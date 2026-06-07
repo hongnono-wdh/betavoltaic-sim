@@ -23,7 +23,7 @@
 ## 1. 克隆仓库
 
 ```powershell
-git clone https://github.com/<your-org>/betavoltaic-sim.git
+git clone https://github.com/hongnono-wdh/betavoltaic-sim.git
 cd betavoltaic-sim
 ```
 
