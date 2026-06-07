@@ -37,8 +37,13 @@ void PrimaryGeneratorAction::ConfigureAnalysis() {
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* evt) {
-    // —— 能量：β 谱采样 —— //
-    const G4double T_keV = fSpectrum->sampleKineticEnergy_keV();
+    // —— 能量：β 谱采样(可选有效源能量下限,模拟源对软 β 的自吸收过滤) —— //
+    G4double T_keV = fSpectrum->sampleKineticEnergy_keV();
+    if (fEminKeV > 0.0) {
+        int guard = 0;
+        while (T_keV < fEminKeV && guard++ < 1000)
+            T_keV = fSpectrum->sampleKineticEnergy_keV();
+    }
     const G4double T = T_keV * keV;
     fGun->SetParticleEnergy(T);
     // 注意：EDR 分母 = "真正进入结构的 β 能量"(论文口径)，在 SteppingAction 里

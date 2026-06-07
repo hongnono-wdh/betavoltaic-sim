@@ -22,6 +22,7 @@ public:
 
     void SetIsotope(const G4String& iso);
     void SetIncidence(const G4String& mode) { fIncidence = mode; } // isotropic|hemisphere|normal
+    void SetEminKeV(G4double e)            { fEminKeV = e; }       // 有效源能量下限(模拟源对软β的自吸收过滤)
     void SetAnaPrefix(const G4String& p)   { fPrefix = p; }
     void SetAnaNTracks(G4int n)            { fNTracks = n; }
     void SetAnaMaxDepthUm(G4double d)      { fMaxDepthUm = d; }
@@ -34,6 +35,7 @@ private:
 
     G4String fIsotope = "Ni-63";
     G4String fIncidence = "isotropic"; // 入射角分布:isotropic(真实4π) | hemisphere(2π下行) | normal(法向)
+    G4double fEminKeV = 0.0;            // 有效源能量下限(keV);>0 时丢弃更软的 β,模拟源自吸收硬化
     G4String fPrefix = "run";
     G4int    fNTracks = 200;
     G4double fMaxDepthUm = 15.0;

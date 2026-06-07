@@ -24,6 +24,11 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* pga
     fIncidenceCmd->SetParameterName("mode", false);
     fIncidenceCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 
+    fEminCmd = new G4UIcmdWithADouble("/gun/eMinKeV", this);
+    fEminCmd->SetGuidance("有效源能量下限(keV);>0 丢弃更软的 β,模拟源自吸收硬化");
+    fEminCmd->SetParameterName("emin", false);
+    fEminCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
     fPrefixCmd = new G4UIcmdWithAString("/ana/prefix", this);
     fPrefixCmd->SetGuidance("输出 CSV 文件名前缀");
     fPrefixCmd->SetParameterName("prefix", false);
@@ -41,13 +46,14 @@ PrimaryGeneratorMessenger::PrimaryGeneratorMessenger(PrimaryGeneratorAction* pga
 }
 
 PrimaryGeneratorMessenger::~PrimaryGeneratorMessenger() {
-    delete fIsotopeCmd; delete fIncidenceCmd; delete fPrefixCmd; delete fNTracksCmd; delete fMaxDepthCmd;
+    delete fIsotopeCmd; delete fIncidenceCmd; delete fEminCmd; delete fPrefixCmd; delete fNTracksCmd; delete fMaxDepthCmd;
     delete fGunDir; delete fAnaDir;
 }
 
 void PrimaryGeneratorMessenger::SetNewValue(G4UIcommand* cmd, G4String val) {
     if      (cmd == fIsotopeCmd)   fPGA->SetIsotope(val);
     else if (cmd == fIncidenceCmd) fPGA->SetIncidence(val);
+    else if (cmd == fEminCmd)      fPGA->SetEminKeV(fEminCmd->GetNewDoubleValue(val));
     else if (cmd == fPrefixCmd)    fPGA->SetAnaPrefix(val);
     else if (cmd == fNTracksCmd)  fPGA->SetAnaNTracks(fNTracksCmd->GetNewIntValue(val));
     else if (cmd == fMaxDepthCmd) fPGA->SetAnaMaxDepthUm(fMaxDepthCmd->GetNewDoubleValue(val));

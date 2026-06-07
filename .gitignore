@@ -35,3 +35,4 @@ macros/_*.mac
 doc/*.pdf
 doc/paper.md
 三个的对应集合几何模型.png
+docs/cf-deploy/

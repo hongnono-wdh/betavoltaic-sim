@@ -24,6 +24,7 @@ private:
     G4UIdirectory*        fAnaDir = nullptr;
     G4UIcmdWithAString*   fIsotopeCmd = nullptr;
     G4UIcmdWithAString*   fIncidenceCmd = nullptr;
+    G4UIcmdWithADouble*   fEminCmd = nullptr;
     G4UIcmdWithAString*   fPrefixCmd  = nullptr;
     G4UIcmdWithAnInteger* fNTracksCmd = nullptr;
     G4UIcmdWithADouble*   fMaxDepthCmd = nullptr;
