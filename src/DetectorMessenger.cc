@@ -55,12 +55,17 @@ DetectorMessenger::DetectorMessenger(DetectorConstruction* det) : fDet(det) {
     fArrayNCmd->SetGuidance("阵列边长 N（共 N×N 根）");
     fArrayNCmd->SetParameterName("n", false);
     fArrayNCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
+
+    fLateralCmd = new G4UIcmdWithADouble("/det/lateralHalfUm", this);
+    fLateralCmd->SetGuidance("横向半宽 (um);须 >> 电子射程以避免侧向逃逸(校准用大值)");
+    fLateralCmd->SetParameterName("L", false);
+    fLateralCmd->AvailableForStates(G4State_PreInit, G4State_Idle);
 }
 
 DetectorMessenger::~DetectorMessenger() {
     delete fStructureCmd; delete fMaterialCmd; delete fFillCmd;
     delete fSubstrateCmd; delete fHeightCmd; delete fTubeOuterCmd;
-    delete fTubeInnerCmd; delete fPitchCmd; delete fArrayNCmd;
+    delete fTubeInnerCmd; delete fPitchCmd; delete fArrayNCmd; delete fLateralCmd;
     delete fDir;
 }
 
@@ -74,4 +79,5 @@ void DetectorMessenger::SetNewValue(G4UIcommand* cmd, G4String val) {
     else if (cmd == fTubeInnerCmd) fDet->SetTubeInnerNm(fTubeInnerCmd->GetNewDoubleValue(val));
     else if (cmd == fPitchCmd)     fDet->SetPitchNm(fPitchCmd->GetNewDoubleValue(val));
     else if (cmd == fArrayNCmd)    fDet->SetArrayN(fArrayNCmd->GetNewIntValue(val));
+    else if (cmd == fLateralCmd)   fDet->SetLateralHalfUm(fLateralCmd->GetNewDoubleValue(val));
 }

@@ -20,11 +20,14 @@ public:
     // 每事件只在 β 首次越过结构顶面时累加一次"入射能量"
     bool  IncidentCounted() const { return fIncidentCounted; }
     void  SetIncidentCounted() { fIncidentCounted = true; }
+    bool  BackCounted() const { return fBackCounted; }
+    void  SetBackCounted() { fBackCounted = true; }
 
 private:
     G4int fEventID = 0;
     bool  fRecordTrack = false;
     bool  fIncidentCounted = false;
+    bool  fBackCounted = false;
 };
 
 #endif // EVENT_ACTION_HH

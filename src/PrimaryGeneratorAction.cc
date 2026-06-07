@@ -37,12 +37,17 @@ void PrimaryGeneratorAction::ConfigureAnalysis() {
 }
 
 void PrimaryGeneratorAction::GeneratePrimaries(G4Event* evt) {
-    // —— 能量：β 谱采样(可选有效源能量下限,模拟源对软 β 的自吸收过滤) —— //
-    G4double T_keV = fSpectrum->sampleKineticEnergy_keV();
-    if (fEminKeV > 0.0) {
-        int guard = 0;
-        while (T_keV < fEminKeV && guard++ < 1000)
-            T_keV = fSpectrum->sampleKineticEnergy_keV();
+    // —— 能量：单能(校准)或 β 谱采样(可选软 β 下限) —— //
+    G4double T_keV;
+    if (fMonoKeV > 0.0) {
+        T_keV = fMonoKeV;                          // 单能电子:用于 η/射程 基准校准
+    } else {
+        T_keV = fSpectrum->sampleKineticEnergy_keV();
+        if (fEminKeV > 0.0) {
+            int guard = 0;
+            while (T_keV < fEminKeV && guard++ < 1000)
+                T_keV = fSpectrum->sampleKineticEnergy_keV();
+        }
     }
     const G4double T = T_keV * keV;
     fGun->SetParticleEnergy(T);
@@ -55,7 +60,9 @@ void PrimaryGeneratorAction::GeneratePrimaries(G4Event* evt) {
     const G4double hx = fSrcHalfXY_nm * nm;
     const G4double x = (2.0 * G4UniformRand() - 1.0) * hx;
     const G4double y = (2.0 * G4UniformRand() - 1.0) * hx;
-    const G4double z = 1.0 * nm;  // 表面源(经实测为最佳配置:与论文 Fig.2 的最优高度/EDR 形状吻合最好)
+    const G4double z = (fSourceMode == "volume")
+                       ? G4UniformRand() * fSrcThick_nm * nm   // Ni 源体内:含自吸收硬化
+                       : 1.0 * nm;                              // 表面源:贴结构顶面
     fGun->SetParticlePosition({x, y, z});
 
     // —— 方向：按入射模型(可配置) —— //

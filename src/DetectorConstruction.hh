@@ -35,6 +35,7 @@ public:
     void SetTubeInnerNm(G4double r)      { fTubeInnerNm = r; }
     void SetPitchNm(G4double p)          { fPitchNm = p; }
     void SetArrayN(G4int n)              { fArrayN = n; }
+    void SetLateralHalfUm(G4double v)    { fLateralHalfUm = v; }
 
     G4double HeightUm() const { return fHeightUm; }
 

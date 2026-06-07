@@ -22,6 +22,10 @@ public:
     // 源发射的入射动能（归一化 EDR 的分母）。
     void AddIncidentEnergy(G4double keV) { fTotalIncidentKeV += keV; }
 
+    // 数量背散射系数 η 计数(校准用):进入结构的 primary 数 / 其中背散射出顶面的数。
+    void AddIncidentCount()    { ++fNIncident; }
+    void AddBackscatterCount() { ++fNBackscatter; }
+
     // 轨迹记录（仅前 nTracks 个事件）。
     bool ShouldRecordTrack(G4int eventID) const { return eventID < fNTracks; }
     void AddTrackPoint(G4int eventID, G4double xUm, G4double zUm);
@@ -31,6 +35,10 @@ public:
     void Write();
 
     G4double TotalIncidentKeV() const { return fTotalIncidentKeV; }
+
+    // 顶面再俘获反射率 R(0=无,1=完美);β 向上逃逸时以 R 概率被反射回结构
+    void     SetReflectR(G4double r) { fReflectR = r; }
+    G4double ReflectR() const { return fReflectR; }
 
 private:
     Analysis() = default;
@@ -45,6 +53,9 @@ private:
     std::vector<double> fEddWall;   // 每箱沉积能量（管壁/实心），keV
     std::vector<double> fEddFill;   // 每箱沉积能量（电解液），keV
     double fTotalIncidentKeV = 0.0;
+    double fReflectR = 0.0;       // 顶面再俘获反射率(config;不随 Reset 清零)
+    long   fNIncident = 0;        // 进入结构的 primary 计数(η 分母)
+    long   fNBackscatter = 0;     // 背散射出顶面的 primary 计数(η 分子)
     bool   fHasFill = false;
 
     // 轨迹：event_id, x, z

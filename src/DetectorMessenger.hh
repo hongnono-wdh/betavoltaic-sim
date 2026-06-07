@@ -30,6 +30,7 @@ private:
     G4UIcmdWithADouble*   fTubeInnerCmd = nullptr;
     G4UIcmdWithADouble*   fPitchCmd     = nullptr;
     G4UIcmdWithAnInteger* fArrayNCmd    = nullptr;
+    G4UIcmdWithADouble*   fLateralCmd   = nullptr;
 };
 
 #endif // DETECTOR_MESSENGER_HH

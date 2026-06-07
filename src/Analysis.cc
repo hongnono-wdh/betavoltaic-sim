@@ -25,6 +25,8 @@ void Analysis::Reset() {
     fEddWall.assign(fNBins, 0.0);
     fEddFill.assign(fNBins, 0.0);
     fTotalIncidentKeV = 0.0;
+    fNIncident = 0;
+    fNBackscatter = 0;
     fHasFill = false;
     fTrackPoints.clear();
     fEdepPoints.clear();
@@ -120,6 +122,11 @@ void Analysis::Write() {
     std::cout << "EDR(total) @10um : " << edrTotAt(10.0) << "%\n";
     if (fHasFill)
         std::cout << "EDR(fill)  @5um  : " << edrAt(5.0, fEddFill) << "%\n";
+    if (fNIncident > 0) {
+        double eta = static_cast<double>(fNBackscatter) / fNIncident;
+        std::cout << "Backscatter eta (number) : " << eta
+                  << "  (" << fNBackscatter << "/" << fNIncident << ")\n";
+    }
     std::cout << "Wrote: " << fPrefix << "_edd_edr.csv / _tracks.csv / _edep_points.csv\n";
     std::cout << "=================================================\n";
 }

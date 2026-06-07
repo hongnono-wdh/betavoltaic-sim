@@ -7,6 +7,7 @@ void EventAction::BeginOfEventAction(const G4Event* evt) {
     fEventID = evt->GetEventID();
     fRecordTrack = Analysis::Instance()->ShouldRecordTrack(fEventID);
     fIncidentCounted = false;
+    fBackCounted = false;
 }
 
 void EventAction::EndOfEventAction(const G4Event*) {}

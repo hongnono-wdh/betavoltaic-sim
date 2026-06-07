@@ -25,9 +25,12 @@ private:
     G4UIcmdWithAString*   fIsotopeCmd = nullptr;
     G4UIcmdWithAString*   fIncidenceCmd = nullptr;
     G4UIcmdWithADouble*   fEminCmd = nullptr;
+    G4UIcmdWithAString*   fSourceModeCmd = nullptr;
+    G4UIcmdWithADouble*   fMonoCmd = nullptr;
     G4UIcmdWithAString*   fPrefixCmd  = nullptr;
     G4UIcmdWithAnInteger* fNTracksCmd = nullptr;
     G4UIcmdWithADouble*   fMaxDepthCmd = nullptr;
+    G4UIcmdWithADouble*   fReflectCmd = nullptr;
 };
 
 #endif // PRIMARY_GENERATOR_MESSENGER_HH

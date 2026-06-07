@@ -23,6 +23,8 @@ public:
     void SetIsotope(const G4String& iso);
     void SetIncidence(const G4String& mode) { fIncidence = mode; } // isotropic|hemisphere|normal
     void SetEminKeV(G4double e)            { fEminKeV = e; }       // 有效源能量下限(模拟源对软β的自吸收过滤)
+    void SetSourceMode(const G4String& m)  { fSourceMode = m; }    // surface(贴顶面) | volume(Ni 源体内,含自吸收)
+    void SetMonoKeV(G4double e)            { fMonoKeV = e; }        // >0 时用单能电子(校准基准用),否则用 β 谱
     void SetAnaPrefix(const G4String& p)   { fPrefix = p; }
     void SetAnaNTracks(G4int n)            { fNTracks = n; }
     void SetAnaMaxDepthUm(G4double d)      { fMaxDepthUm = d; }
@@ -36,6 +38,8 @@ private:
     G4String fIsotope = "Ni-63";
     G4String fIncidence = "isotropic"; // 入射角分布:isotropic(真实4π) | hemisphere(2π下行) | normal(法向)
     G4double fEminKeV = 0.0;            // 有效源能量下限(keV);>0 时丢弃更软的 β,模拟源自吸收硬化
+    G4String fSourceMode = "surface";  // surface(贴结构顶面) | volume(Ni 源体内均匀,含自吸收)
+    G4double fMonoKeV = 0.0;            // >0:单能电子(校准 η/射程 用);0:用 β 谱
     G4String fPrefix = "run";
     G4int    fNTracks = 200;
     G4double fMaxDepthUm = 15.0;
