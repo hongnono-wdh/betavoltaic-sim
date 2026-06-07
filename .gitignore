@@ -30,3 +30,8 @@ macros/_*.mac
 # 保留示例 macros 与 configs（不忽略）
 !macros/
 !configs/
+
+# 论文版权材料(Elsevier)——不发布到公开仓库
+doc/*.pdf
+doc/paper.md
+三个的对应集合几何模型.png
