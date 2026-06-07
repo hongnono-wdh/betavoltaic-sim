@@ -381,6 +381,25 @@ betavoltaic-sim 技能,带我从零搭好并学会这套 β 能量沉积仿真:
 (如 UAC、装组件)请明确告诉我点什么。</code></pre>
 
   <div class="callout"><p><strong>给 Hermes 的环境提醒:</strong> ① C 盘留 ≥20GB(VS C++ 组件)、E 盘放 Geant4(源码+数据~3GB+编译);② Geant4 首次编译 30min–2h,可后台;③ 若 VS 是 Community 且装在非默认盘,脚本里 <code>$vsPath</code> 需对应修改。</p></div>
+
+  <h3>出"论文 Fig.2 风格图"——一句话指令</h3>
+  <p>把下面这句发给装好环境的 Claude Code(技能会自动跑通并出 <code>paper_panel_*.png</code> 复合图):</p>
+  <pre><code>用 betavoltaic-sim 技能,帮我画论文 Fig.2 风格的图:同位素 Ni-63、
+结构 [实心/纳米管/纳米线]、材料 [TiO2_anatase 或你的材料]。要求:
+① 法向入射、六方密堆;
+② 横向容纳 lateralHalfUm 设 20μm(否则高能 β 侧漏会压低结果);
+③ 用 plot.py 出 paper_panel_* 复合图(上轨迹 + 下双轴 红EDD/蓝EDR);
+④ 出图前先跑一次 η 自校准确认"尺子准"。
+把 paper_panel 图和 EDR 饱和值给我。</code></pre>
+
+  <h3>或直接命令行(懂一点的人)</h3>
+  <pre><code>. .\setup_env.ps1
+python analysis\yaml_to_mac.py configs\my.yaml -o run.mac   <span class="cmt"># my.yaml 内 incidence: normal</span>
+.\build\betasim.exe run.mac
+python analysis\plot.py --prefixes data\my=MyRun           <span class="cmt"># 自动出 paper_panel_MyRun.png</span></code></pre>
+  <p><code>my.yaml</code> 关键三行:<code>structure: nanotube_array</code> · <code>incidence: normal</code> · <code>geometry:{height_um:12,...}</code>。</p>
+
+  <div class="callout"><p><strong>两个避坑提醒(我踩过的):</strong> ① <strong>横向容纳要够大</strong>(Ni-63 用 ±15–20μm),否则 EDR 偏低(侧向逃逸 artifact);② 想让红线 EDD 峰也像论文在次表面(~0.65μm),加 <code>/gun/monoKeV 17</code>(单能)或源硬化——用完整 β 谱时红线在表面最高(物理正确,软 β 多)。</p></div>
 </div></section>
 
 <footer><div class="wrap">
