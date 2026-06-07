@@ -9,6 +9,7 @@
 /det/tubeInnerNm 50
 /det/pitchNm   120
 /det/arrayN    8
+/det/lateralHalfUm 20
 /gun/isotope   Ni-63
 /gun/incidence normal
 /ana/prefix    data/ETNTAs

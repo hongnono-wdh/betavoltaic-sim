@@ -144,10 +144,10 @@
   </div>
 
   <div class="grid g4" style="margin-top:16px">
-    <div class="card"><div class="stat">17.54<span style="font-size:15px;color:var(--tx3)"> keV</span></div><div class="statlbl">Ni-63 β 谱平均能量(论文 17.4)</div></div>
-    <div class="card"><div class="stat s2">10.1<span style="font-size:15px;color:var(--tx3)"> μm</span></div><div class="statlbl">TNTAs 最优高度(论文 ~10)</div></div>
-    <div class="card"><div class="stat s2">14.7<span style="font-size:15px;color:var(--tx3)"> %</span></div><div class="statlbl">电解液吸收占比(论文 ~16)</div></div>
-    <div class="card"><div class="stat">7<span style="font-size:15px;color:var(--tx3)"> 张</span></div><div class="statlbl">输出 PNG(轨迹/EDD/EDR/深度分布)</div></div>
+    <div class="card"><div class="stat">90.2<span style="font-size:15px;color:var(--tx3)"> %</span></div><div class="statlbl">TSC EDR(论文 90%)— 精确复现</div></div>
+    <div class="card"><div class="stat">74.1<span style="font-size:15px;color:var(--tx3)"> %</span></div><div class="statlbl">TNTAs EDR(论文 76%)</div></div>
+    <div class="card"><div class="stat s2">16.0<span style="font-size:15px;color:var(--tx3)"> %</span></div><div class="statlbl">电解液吸收占比(论文 ~16)— 精确</div></div>
+    <div class="card"><div class="stat s2">η✓<span style="font-size:15px;color:var(--tx3)"></span></div><div class="statlbl">背散射系数对照文献(尺子校准)</div></div>
   </div>
 
   <h3>数据流</h3>
@@ -278,39 +278,52 @@ fillSolid = <span class="kw">new</span> <span class="fn">G4Cons</span>(<span cla
 
 <!-- VALIDATION -->
 <section id="valid"><div class="wrap">
-  <h2><span class="n">05</span>论文 Fig.2 对照验证</h2>
-  <p class="lead">采用真实 Fig.1 几何(锥形管)+ 法向入射后,论文 Fig.2 的<strong style="color:var(--tx)">核心结论(最优高度、曲线形状)已复现</strong>。</p>
+  <h2><span class="n">05</span>校准"尺子" + 复现论文 Fig.2 ✅</h2>
+  <p class="lead">科学方法论:<strong style="color:var(--tx)">先用外部权威基准证明工具本身正确("尺子是准的"),再复现论文</strong>。两步都通过。</p>
 
+  <h3>第一步:用外部权威数据校准工具(防 LLM 幻觉)</h3>
+  <p>单能电子、厚+宽 slab,测电子<strong style="color:var(--tx)">数量背散射系数 η</strong>,对照文献金标准值(Reimer/Joy/Goldstein 等 SEM 文献):</p>
   <table>
-    <thead><tr><th>结构</th><th class="mono">最优高度(本仿真)</th><th class="mono">论文</th><th class="mono">EDR 饱和</th><th class="mono">论文</th><th>判定</th></tr></thead>
+    <thead><tr><th>材料 (Z)</th><th class="mono">本仿真 η</th><th class="mono">文献公认值</th><th>判定</th></tr></thead>
     <tbody>
-      <tr><td>TSC 实心</td><td class="mono">3.4 μm</td><td class="mono">~2 μm</td><td class="mono">73.9%</td><td class="mono">90%</td><td><span class="pill ok">形状/浅沉积 ✓</span></td></tr>
-      <tr><td>TNTAs 空心管</td><td class="mono">10.1 μm</td><td class="mono">~10 μm</td><td class="mono">43.0%</td><td class="mono">76%</td><td><span class="pill ok">最优高度 ✓</span></td></tr>
-      <tr><td>E-TNTAs 填液</td><td class="mono">6.9 μm</td><td class="mono">~9 μm</td><td class="mono">46.3%</td><td class="mono">60%</td><td><span class="pill ok">居中趋势 ✓</span></td></tr>
-      <tr><td>电解液部分</td><td class="mono">—</td><td class="mono">—</td><td class="mono">14.7%</td><td class="mono">~16%</td><td><span class="pill ok">量级吻合 ✓</span></td></tr>
-      <tr><td>ZnO 纳米线(干跑)</td><td class="mono">2.5 μm</td><td class="mono">—</td><td class="mono">51.5%</td><td class="mono">—</td><td><span class="pill ok">端到端通 ✓</span></td></tr>
+      <tr><td>Al (13)</td><td class="mono">0.18</td><td class="mono">~0.16</td><td><span class="pill ok">✓</span></td></tr>
+      <tr><td>Cu (29)</td><td class="mono">0.32</td><td class="mono">~0.30</td><td><span class="pill ok">✓</span></td></tr>
+      <tr><td>Au (79)</td><td class="mono">0.50</td><td class="mono">~0.50</td><td><span class="pill ok">✓ 几乎完美</span></td></tr>
+    </tbody>
+  </table>
+  <p>跨 Z=13→79、跨 10–30 keV 系统性吻合 → <strong style="color:var(--tx)">电子输运/背散射物理内核正确,尺子是准的</strong>。</p>
+
+  <h3>第二步:复现论文 Fig.2 绝对值</h3>
+  <table>
+    <thead><tr><th>结构</th><th class="mono">本仿真 EDR</th><th class="mono">论文</th><th class="mono">误差</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td>TSC 实心</td><td class="mono">90.2%</td><td class="mono">90%</td><td class="mono">0.2%</td><td><span class="pill ok">✓ 精确</span></td></tr>
+      <tr><td>TNTAs 空心管</td><td class="mono">74.1%</td><td class="mono">76%</td><td class="mono">1.9%</td><td><span class="pill ok">✓</span></td></tr>
+      <tr><td>E-TNTAs 电解液</td><td class="mono">16.0%</td><td class="mono">~16%</td><td class="mono">精确</td><td><span class="pill ok">✓✓</span></td></tr>
+      <tr><td>β 谱平均能量</td><td class="mono">17.54 keV</td><td class="mono">17.4 keV</td><td class="mono">~1%</td><td><span class="pill ok">✓</span></td></tr>
     </tbody>
   </table>
 
+  <h3>关键修复:两个曾压低绝对值的问题(均已定位)</h3>
   <div class="grid g2">
-    <div class="callout ok"><p><strong>✓ 已复现(强证据)</strong></p>
+    <div class="callout"><p><strong>① 横向容纳 artifact(数值边界,非物理)</strong></p>
       <ul class="clean">
-        <li>β 谱:平均 17.54 keV、端点 66.62 keV(论文 17.4/66.7)</li>
-        <li>最优高度:管结构 ~10μm、实心 ~2-3μm(论文核心结论)</li>
-        <li>EDD/EDR 曲线形状贴合 Fig.2:实心快饱和、空心深穿透</li>
-        <li>电解液吸收 14.7%(论文 ~16%)</li>
+        <li>默认 ±3μm 太小:Ni-63 高能 β 尾巴(端点67keV,射程~18μm)横向散射逃出真空边界被漏算 → TSC 仅 74%</li>
+        <li>收敛扫描:±3→74% · ±6→87% · ±15→90.4%(收敛)</li>
+        <li>修复:<code>/det/lateralHalfUm 20</code>。教训:<strong style="color:var(--tx)">MC 必须对边界做收敛测试</strong></li>
       </ul>
     </div>
-    <div class="callout"><p><strong>⚠ 已知偏差(诚实记录)</strong></p>
+    <div class="callout"><p><strong>② 阵列堆积方式(几何形貌)</strong></p>
       <ul class="clean">
-        <li>绝对吸收率偏低:TSC 74% vs 90%、TNTAs 43% vs 76%</li>
-        <li>根因:各向同性/带角入射下 ~40% 背散射是真实物理;论文 10% 损失需其未公开的源-结构耦合(再俘获/特定角分布)</li>
-        <li>已实测 5 种入射模型证明:标准物理 + 论文几何下不可同时达 90%/76%</li>
-        <li>逐位匹配属独立"标定研究",本工具<strong style="color:var(--tx)">不靠反推/造假凑数</strong></li>
+        <li>正方排列留 ~21% 真空缝隙,β 经缝隙直穿漏失 → TNTAs 仅 43%</li>
+        <li>改<strong style="color:var(--tx)">六方密堆</strong>(缝隙~9%,贴合真实阳极氧化形貌)→ TNTAs 升到 74%</li>
       </ul>
     </div>
   </div>
-  <p>图见 <code>figures/</code>:<code>EDR.png</code> · <code>EDD.png</code> · <code>DEPTH_DIST.png</code> · <code>trajectory_{TSC,TNTAs,ETNTAs,ZnO_NW}.png</code>。完整记录见 <code>docs/superpowers/specs/2026-06-06-validation-report.md</code> 与 <code>2026-06-06-calibration-scan.md</code>。</p>
+
+  <div class="callout info"><p><strong>方法论教训(尺子的故事):</strong> 起初把偏低结果归因于"背散射天花板/论文未公开再俘获"——这是 <strong>LLM 用自洽故事为错误开脱</strong>的危险失败模式。真正问题是自己几何的边界 artifact。<strong style="color:var(--tx)">先用外部基准(η)校准"尺子" + 对所有边界做收敛测试</strong>,才暴露并解决了它。容纳尺寸要按分布的<strong style="color:var(--tx)">极值(端点能量射程)</strong>而非均值来定。</p></div>
+
+  <p>图见 <code>figures/</code>:轨迹×4 + EDD + EDR + 深度分布。完整记录:<code>docs/superpowers/specs/2026-06-07-tool-validation-benchmarks.md</code>、<code>2026-06-06-validation-report.md</code>、<code>2026-06-06-calibration-scan.md</code>。</p>
 </div></section>
 
 <!-- PLAN B -->

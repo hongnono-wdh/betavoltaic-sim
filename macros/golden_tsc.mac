@@ -5,6 +5,7 @@
 /det/fill      none
 /det/substrate Ti
 /det/heightUm  12
+/det/lateralHalfUm 20
 /gun/isotope   Ni-63
 /gun/incidence normal
 /ana/prefix    data/TSC

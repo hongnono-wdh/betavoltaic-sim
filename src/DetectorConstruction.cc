@@ -198,12 +198,18 @@ void DetectorConstruction::BuildArray(G4LogicalVolume* world, bool hollow) {
         fillLV->SetVisAttributes(new G4VisAttributes(G4Colour(0.2, 0.6, 1.0, 0.3)));
     }
 
-    const G4double offset = 0.5 * (N - 1) * pitch; // 居中
+    // 六方密堆(更贴近真实阳极氧化 TiO2 纳米管形貌):奇数行 x 偏移半个 pitch,
+    // 行间距 = pitch·√3/2。缝隙率 ~9%(正方排列为 ~21%),减少 β 经缝隙穿透漏失。
+    const G4double dy = pitch * std::sqrt(3.0) / 2.0;          // 行间距
+    const G4int    Nrow = static_cast<G4int>(std::ceil(N * pitch / dy)); // 保持覆盖范围
+    const G4double xoff = 0.5 * (N - 1) * pitch;
+    const G4double yoff = 0.5 * (Nrow - 1) * dy;
     G4int copy = 0;
-    for (G4int i = 0; i < N; ++i) {
-        for (G4int j = 0; j < N; ++j) {
-            const G4double x = i * pitch - offset;
-            const G4double y = j * pitch - offset;
+    for (G4int jr = 0; jr < Nrow; ++jr) {
+        const G4double y = jr * dy - yoff;
+        const G4double xshift = (jr % 2) ? 0.5 * pitch : 0.0;  // 奇数行错位半格
+        for (G4int i = 0; i < N; ++i) {
+            const G4double x = i * pitch - xoff + xshift;
             const G4ThreeVector pos(x, y, -0.5 * H);
             new G4PVPlacement(nullptr, pos, tubeLV, "structure",
                               world, false, copy, false);
