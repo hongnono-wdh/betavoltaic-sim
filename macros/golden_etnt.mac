@@ -1,0 +1,18 @@
+# golden_etnt.mac — 黄金测试 (3/3): E-TNTAs = 纳米管阵列 + 管腔填充电解液(乙腈)
+# 期望：管壁部分 EDD 峰 ~2.0um，~60% 在 9um 内；电解液部分仅吸收 ~16%(5um 内)
+/det/structure nanotube_array
+/det/material  TiO2_anatase
+/det/fill      acetonitrile
+/det/substrate Ti
+/det/heightUm  12
+/det/tubeOuterNm 60
+/det/tubeInnerNm 50
+/det/pitchNm   120
+/det/arrayN    8
+/gun/isotope   Ni-63
+/gun/incidence normal
+/ana/prefix    data/ETNTAs
+/ana/nTracks   150
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    50000

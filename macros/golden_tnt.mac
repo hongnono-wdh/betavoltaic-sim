@@ -1,0 +1,18 @@
+# golden_tnt.mac — 黄金测试 (2/3): TNTAs = TiO2 中空纳米管阵列（无填充）
+# 期望：EDD 谱更宽，~76% 沉积在 10um 内（空心结构使部分 β 穿透）
+/det/structure nanotube_array
+/det/material  TiO2_anatase
+/det/fill      none
+/det/substrate Ti
+/det/heightUm  12
+/det/tubeOuterNm 60
+/det/tubeInnerNm 50
+/det/pitchNm   120
+/det/arrayN    8
+/gun/isotope   Ni-63
+/gun/incidence normal
+/ana/prefix    data/TNTAs
+/ana/nTracks   150
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    50000

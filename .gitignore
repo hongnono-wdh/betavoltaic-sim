@@ -1,0 +1,32 @@
+# 构建产物
+build/
+*.exe
+*.obj
+*.o
+*.ilk
+*.pdb
+
+# 仿真输出
+data/
+figures/
+*.csv
+run.mac
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# 渲染产物 / 临时
+doc/pdf_pages/
+run.mac
+run_zno.mac
+macros/_*.mac
+
+# IDE
+.idea/
+.vs/
+
+# 保留示例 macros 与 configs（不忽略）
+!macros/
+!configs/

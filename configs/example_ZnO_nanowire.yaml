@@ -1,0 +1,17 @@
+# 示例(端到端干跑)：换材料+换结构——ZnO 纳米线阵列 + Ni-63
+# 展示"只改配置就能跑新材料"：相对上一个例子，改了 material/structure/fill。
+isotope:    Ni-63
+structure:  nanowire_array   # 实心纳米线(非中空管)
+material:   ZnO              # 换成氧化锌
+fill:       none             # 纳米线无管腔，填充无意义
+substrate:  Si               # 换成硅衬底
+geometry:
+  height_um:     8
+  tube_outer_nm: 50          # 纳米线半径(nanowire 用 outer 作线半径，inner 忽略)
+  tube_inner_nm: 0
+  pitch_nm:      120
+  array:         8x8
+run:
+  n_events:   40000
+  n_tracks:   150
+output_prefix: data/ZnO_nanowire

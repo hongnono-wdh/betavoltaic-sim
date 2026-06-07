@@ -1,0 +1,12 @@
+# smoke_tsc.mac - quick check, TSC solid, 5000 events
+/det/structure solid
+/det/material  TiO2_anatase
+/det/fill      none
+/det/substrate Ti
+/det/heightUm  12
+/gun/isotope   Ni-63
+/ana/prefix    data/smoke_tsc
+/ana/nTracks   50
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    5000

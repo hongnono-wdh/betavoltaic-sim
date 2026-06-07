@@ -1,0 +1,16 @@
+# run_default.mac — 无参运行 betasim 时的默认仿真（TNTAs 纳米管阵列）
+/det/structure nanotube_array
+/det/material  TiO2_anatase
+/det/fill      none
+/det/substrate Ti
+/det/heightUm  12
+/det/tubeOuterNm 60
+/det/tubeInnerNm 50
+/det/pitchNm   120
+/det/arrayN    8
+/gun/isotope   Ni-63
+/ana/prefix    data/default
+/ana/nTracks   150
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    20000

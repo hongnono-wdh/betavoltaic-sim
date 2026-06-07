@@ -1,0 +1,16 @@
+# smoke.mac - quick runtime sanity (1000 events, TNTAs)
+/det/structure nanotube_array
+/det/material  TiO2_anatase
+/det/fill      none
+/det/substrate Ti
+/det/heightUm  12
+/det/tubeOuterNm 60
+/det/tubeInnerNm 50
+/det/pitchNm   120
+/det/arrayN    8
+/gun/isotope   Ni-63
+/ana/prefix    data/smoke
+/ana/nTracks   50
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    1000

@@ -1,0 +1,17 @@
+# 示例：复现论文的 TiO2 纳米管阵列 (TNTAs) + Ni-63
+# 这是一份"实验设置单"——只改这些行即可，无需碰 C++。
+isotope:    Ni-63            # 同位素源: Ni-63 / H-3 / C-14 / Pm-147
+structure:  nanotube_array   # solid / nanotube_array / nanowire_array
+material:   TiO2_anatase     # 结构材料
+fill:       none             # 管腔填充: none / acetonitrile(电解液近似)
+substrate:  Ti               # 衬底: none / Ti / Si ...
+geometry:
+  height_um:     12          # 结构高度(扫到比预期最优更高，便于"定位"最优值)
+  tube_outer_nm: 60
+  tube_inner_nm: 50
+  pitch_nm:      120
+  array:         8x8
+run:
+  n_events:   50000
+  n_tracks:   150
+output_prefix: data/TNTAs

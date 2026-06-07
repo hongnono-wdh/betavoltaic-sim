@@ -1,0 +1,14 @@
+# golden_tsc.mac — 黄金测试 (1/3): TSC = TiO2 实心立方体
+# 期望：EDD 峰 ~0.9um，~90% 沉积在 2um 内（~10% 背散射损失）
+/det/structure solid
+/det/material  TiO2_anatase
+/det/fill      none
+/det/substrate Ti
+/det/heightUm  12
+/gun/isotope   Ni-63
+/gun/incidence normal
+/ana/prefix    data/TSC
+/ana/nTracks   150
+/ana/maxDepthUm 15
+/run/initialize
+/run/beamOn    50000
