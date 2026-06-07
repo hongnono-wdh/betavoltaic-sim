@@ -113,23 +113,25 @@ def read_map2d(prefix):
     return mat, meta
 
 
-def plot_traj_colored(prefix, label, out_dir, max_depth=10.0):
-    """论文图1风格:X(横向) vs 深度,沉积点按能量着色(hot),带颜色条。"""
-    edeps = read_points(prefix + "_edep_points.csv")
-    if edeps is None:
-        print(f"[skip traj-colored] no edep points for {label}")
+def plot_traj_colored(prefix, label, out_dir, max_depth=10.0, x_half=3.0):
+    """论文图1风格:X(横向) vs 深度,β 径迹点按电子动能着色(高=红→低=黄),带颜色条。"""
+    tracks = read_points(prefix + "_tracks.csv")
+    if tracks is None or "ke_kev" not in tracks.dtype.names:
+        print(f"[skip traj-colored] no track-energy for {label}")
         return
-    fig, ax = plt.subplots(figsize=(6, 3.2))
-    depth = -edeps["z_um"]
-    e = edeps["edep_kev"]
-    sc = ax.scatter(depth, edeps["x_um"], c=e, s=3, cmap="hot",
-                    vmin=0, vmax=np.percentile(e, 98), linewidths=0)
-    ax.set_xlim(0, max_depth)
+    depth = -tracks["z_um"]
+    x = tracks["x_um"]
+    ke = tracks["ke_kev"]
+    m = (depth >= 0) & (depth <= max_depth) & (np.abs(x) <= x_half)
+    fig, ax = plt.subplots(figsize=(6, 3.0))
+    sc = ax.scatter(depth[m], x[m], c=ke[m], s=1.2, cmap="autumn_r",
+                    vmin=0, vmax=np.percentile(ke[m], 97) if m.any() else 67,
+                    linewidths=0)
+    ax.set_xlim(0, max_depth); ax.set_ylim(-x_half, x_half)
     ax.set_xlabel("Height / Depth (μm)")
     ax.set_ylabel("X (μm)")
-    ax.set_title(f"β trajectories — {label}", fontsize=10)
-    cb = fig.colorbar(sc, ax=ax, pad=0.02)
-    cb.set_label("deposit (keV)")
+    ax.set_title(f"β trajectories (colored by energy) — {label}", fontsize=10)
+    cb = fig.colorbar(sc, ax=ax, pad=0.02); cb.set_label("electron energy (keV)")
     fig.tight_layout()
     out = os.path.join(out_dir, f"trajcolor_{label}.png")
     fig.savefig(out, dpi=150); plt.close(fig)
@@ -149,12 +151,14 @@ def plot_heatmap_panel(prefix, label, out_dir, max_depth=10.0):
     full_depth = ndepth * bw
 
     fig, axh = plt.subplots(figsize=(6, 4.2))
-    # 热图:行=深度(转置使深度在 x 轴),列=横向 x
+    # 热图:行=深度(转置使深度在 x 轴),列=横向 x。百分位配色,避免中线过亮把四周洗白。
     extent = [0, full_depth, -xhalf, xhalf]
+    nz = mat[mat > 0]
+    vmax = np.percentile(nz, 96) if nz.size else 1.0
     axh.imshow(mat.T, origin="lower", aspect="auto", extent=extent,
-               cmap="jet", interpolation="bilinear")
+               cmap="jet", interpolation="bilinear", vmin=0, vmax=vmax)
     axh.set_xlim(0, max_depth)
-    axh.set_yticks([])                       # 纵向为横向X(仅作背景),隐藏刻度
+    axh.set_yticks([])               # 热图纵向=横向X,仅作背景;隐藏,避免与 keV 轴标签重叠
     axh.set_xlabel("Height (μm)")
 
     # 叠加曲线:用独立坐标轴(共享 x)
@@ -163,11 +167,16 @@ def plot_heatmap_panel(prefix, label, out_dir, max_depth=10.0):
     axE.set_facecolor("none")
     axE.set_xlim(0, max_depth)
     d = data["depth_um"]
-    # EDD 缩放到 keV 视觉范围(归一化形状 → 任意单位,标 a.u./keV)
-    edd = data["edd_total"]
-    axE.plot(d, edd / edd.max(), color="black", lw=2)
-    axE.set_ylim(0, 1.15)
-    axE.set_ylabel("Energy deposition (a.u.)")
+    # EDD:keV/μm(单位深度沉积强度,每入射β)——不依赖分箱宽度,量级与论文一致
+    if "edd_kev_total" in data.dtype.names and len(d) > 1:
+        bw = d[1] - d[0]
+        edd = data["edd_kev_total"] / bw
+        ylab = "Energy deposition (keV/μm)"
+    else:
+        edd = data["edd_total"]; ylab = "Energy deposition (a.u.)"
+    axE.plot(d, edd, color="black", lw=2)
+    axE.set_ylim(0, edd.max() * 1.15 if edd.max() > 0 else 1)
+    axE.set_ylabel(ylab)
     axE.patch.set_alpha(0)
     axE.set_xticks([])
 
@@ -207,9 +216,14 @@ def plot_paper_panel(prefix, label, out_dir, max_depth=10.0):
     # —— 下:双轴 EDD(红,左)/ EDR(蓝,右)—— #
     ax1 = fig.add_subplot(gs[1], sharex=ax0)
     d = data["depth_um"]
-    ax1.plot(d, data["edd_total"], color="red", lw=2, label="EDD")
+    if "edd_kev_total" in data.dtype.names and len(d) > 1:
+        edd_y = data["edd_kev_total"] / (d[1] - d[0])
+        edd_lab = "Deposition energy (keV/μm)"
+    else:
+        edd_y = data["edd_total"]; edd_lab = "Deposition energy (a.u.)"
+    ax1.plot(d, edd_y, color="red", lw=2, label="EDD")
     ax1.set_xlabel("Depth (μm)")
-    ax1.set_ylabel("Deposition energy (a.u.)", color="red")
+    ax1.set_ylabel(edd_lab, color="red")
     ax1.tick_params(axis="y", labelcolor="red")
     ax1.set_xlim(0, max_depth)
 

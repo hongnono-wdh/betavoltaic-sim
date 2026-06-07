@@ -46,7 +46,7 @@ private:
 
     // 源在结构顶面中心小区域发射(±fSrcHalfXY_nm)，远离侧壁以避免侧向泄漏伪影；
     // 结构横向被放大到 >> 电子射程来容纳侧向散射(见 DetectorConstruction)。
-    G4double fSrcHalfXY_nm = 250.0;
+    G4double fSrcHalfXY_nm = 500.0;   // 源发射半宽(贴论文 1μm 源);仍远小于横向容纳,EDR 不受影响
     G4double fSrcThick_nm  = 200.0;
 };
 

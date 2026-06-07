@@ -72,7 +72,7 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
         const G4int id = fEventAction->EventID();
         const G4double zUmPost = post->GetPosition().z() / um;
         const G4double xUmPost = post->GetPosition().x() / um;
-        Analysis::Instance()->AddTrackPoint(id, xUmPost, zUmPost);
+        Analysis::Instance()->AddTrackPoint(id, xUmPost, zUmPost, post->GetKineticEnergy() / keV);
         if (edepKeV > 0.0)
             Analysis::Instance()->AddEdepPoint(id, xUm, zUmMid, edepKeV);
     }

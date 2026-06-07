@@ -31,7 +31,7 @@ public:
 
     // 轨迹记录（仅前 nTracks 个事件）。
     bool ShouldRecordTrack(G4int eventID) const { return eventID < fNTracks; }
-    void AddTrackPoint(G4int eventID, G4double xUm, G4double zUm);
+    void AddTrackPoint(G4int eventID, G4double xUm, G4double zUm, G4double keV);
     void AddEdepPoint(G4int eventID, G4double xUm, G4double zUm, G4double edepKeV);
 
     // 运行结束写出所有 CSV，并打印自检摘要。
@@ -59,15 +59,15 @@ private:
     // 2D 沉积图(深度 × 横向):nDepth(=fNBins) × fNx,横向窗口 ±fXHalfUm
     std::vector<double> fMap2D;
     int    fNx = 120;
-    double fXHalfUm = 2.5;
+    double fXHalfUm = 2.0;
     double fTotalIncidentKeV = 0.0;
     double fReflectR = 0.0;       // 顶面再俘获反射率(config;不随 Reset 清零)
     long   fNIncident = 0;        // 进入结构的 primary 计数(η 分母)
     long   fNBackscatter = 0;     // 背散射出顶面的 primary 计数(η 分子)
     bool   fHasFill = false;
 
-    // 轨迹：event_id, x, z
-    std::vector<std::array<double,3>> fTrackPoints;
+    // 轨迹：event_id, x, z, ke(keV)
+    std::vector<std::array<double,4>> fTrackPoints;
     // 沉积点：event_id, x, z, edep
     std::vector<std::array<double,4>> fEdepPoints;
 };

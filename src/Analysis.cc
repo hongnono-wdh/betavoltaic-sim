@@ -58,9 +58,9 @@ void Analysis::AddEdepMap(G4double depthUm, G4double xUm, G4double edepKeV) {
     fMap2D[static_cast<size_t>(db) * fNx + xb] += edepKeV;
 }
 
-void Analysis::AddTrackPoint(G4int eventID, G4double xUm, G4double zUm) {
+void Analysis::AddTrackPoint(G4int eventID, G4double xUm, G4double zUm, G4double keV) {
     if (eventID >= fNTracks) return;
-    fTrackPoints.push_back({static_cast<double>(eventID), xUm, zUm});
+    fTrackPoints.push_back({static_cast<double>(eventID), xUm, zUm, keV});
 }
 
 void Analysis::AddEdepPoint(G4int eventID, G4double xUm, G4double zUm, G4double edepKeV) {
@@ -74,8 +74,9 @@ void Analysis::Write() {
     // —— EDD/EDR CSV —— //
     {
         std::ofstream f(fPrefix + "_edd_edr.csv");
-        f << "depth_um,edd_wall,edd_fill,edd_total,edr_wall,edr_fill,edr_total\n";
+        f << "depth_um,edd_wall,edd_fill,edd_total,edr_wall,edr_fill,edr_total,edd_kev_total\n";
         double cumW = 0.0, cumF = 0.0, cumT = 0.0;
+        const double nInc = (fNIncident > 0) ? static_cast<double>(fNIncident) : 1.0;
         f << std::setprecision(8);
         for (int b = 0; b < fNBins; ++b) {
             const double depth = (b + 0.5) * fBinWidthUm;
@@ -85,17 +86,20 @@ void Analysis::Write() {
             const double eddW = ew / denom / fBinWidthUm;
             const double eddF = ef / denom / fBinWidthUm;
             const double eddT = et / denom / fBinWidthUm;
+            // 绝对 keV:每入射β、每深度切片沉积的能量(匹配论文 keV 纵轴)
+            const double eddKev = et / nInc;
             f << depth << ',' << eddW << ',' << eddF << ',' << eddT << ','
-              << (cumW/denom) << ',' << (cumF/denom) << ',' << (cumT/denom) << '\n';
+              << (cumW/denom) << ',' << (cumF/denom) << ',' << (cumT/denom) << ','
+              << eddKev << '\n';
         }
     }
 
     // —— 轨迹 CSV —— //
     {
         std::ofstream f(fPrefix + "_tracks.csv");
-        f << "event_id,x_um,z_um\n" << std::setprecision(6);
+        f << "event_id,x_um,z_um,ke_kev\n" << std::setprecision(6);
         for (auto& p : fTrackPoints)
-            f << static_cast<int>(p[0]) << ',' << p[1] << ',' << p[2] << '\n';
+            f << static_cast<int>(p[0]) << ',' << p[1] << ',' << p[2] << ',' << p[3] << '\n';
     }
 
     // —— 沉积点 CSV —— //
