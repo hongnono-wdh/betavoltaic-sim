@@ -19,6 +19,9 @@ public:
     // 累加一次能量沉积：depthUm = -z；edepKeV；isFill=true 表示在电解液内。
     void AddEdep(G4double depthUm, G4double edepKeV, bool isFill);
 
+    // 2D 能量沉积图(深度 × 横向 x),用于论文风格热力图背景(累加所有步,非仅轨迹事件)。
+    void AddEdepMap(G4double depthUm, G4double xUm, G4double edepKeV);
+
     // 源发射的入射动能（归一化 EDR 的分母）。
     void AddIncidentEnergy(G4double keV) { fTotalIncidentKeV += keV; }
 
@@ -52,6 +55,11 @@ private:
 
     std::vector<double> fEddWall;   // 每箱沉积能量（管壁/实心），keV
     std::vector<double> fEddFill;   // 每箱沉积能量（电解液），keV
+
+    // 2D 沉积图(深度 × 横向):nDepth(=fNBins) × fNx,横向窗口 ±fXHalfUm
+    std::vector<double> fMap2D;
+    int    fNx = 120;
+    double fXHalfUm = 2.5;
     double fTotalIncidentKeV = 0.0;
     double fReflectR = 0.0;       // 顶面再俘获反射率(config;不随 Reset 清零)
     long   fNIncident = 0;        // 进入结构的 primary 计数(η 分母)

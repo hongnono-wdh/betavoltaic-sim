@@ -57,10 +57,13 @@ void SteppingAction::UserSteppingAction(const G4Step* step) {
 
     // —— EDD/EDR：只统计结构(管壁/实心) 与 电解液 —— //
     if (edepKeV > 0.0) {
-        if (name == "structure")
+        if (name == "structure") {
             Analysis::Instance()->AddEdep(depthUm, edepKeV, /*isFill=*/false);
-        else if (name == "fill")
+            Analysis::Instance()->AddEdepMap(depthUm, xUm, edepKeV);
+        } else if (name == "fill") {
             Analysis::Instance()->AddEdep(depthUm, edepKeV, /*isFill=*/true);
+            Analysis::Instance()->AddEdepMap(depthUm, xUm, edepKeV);
+        }
         // 在 source/substrate/world 的沉积视为损失（自吸收/穿透），不计入。
     }
 

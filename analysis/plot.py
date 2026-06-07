@@ -95,6 +95,94 @@ def plot_trajectory(prefix, label, out_dir, height_um=12.0):
     print(f"[ok] {out}")
 
 
+def read_map2d(prefix):
+    """读 _map2d.csv -> (matrix[ndepth,nx], meta dict)。"""
+    path = prefix + "_map2d.csv"
+    if not os.path.exists(path):
+        return None, None
+    with open(path, "r", encoding="utf-8") as f:
+        header = f.readline()
+    meta = {}
+    for tok in header.replace("#", "").split():
+        if "=" in tok:
+            k, v = tok.split("=")
+            meta[k] = float(v)
+    mat = np.genfromtxt(path, delimiter=",", skip_header=1)
+    if mat.ndim == 1:
+        mat = mat.reshape(1, -1)
+    return mat, meta
+
+
+def plot_traj_colored(prefix, label, out_dir, max_depth=10.0):
+    """论文图1风格:X(横向) vs 深度,沉积点按能量着色(hot),带颜色条。"""
+    edeps = read_points(prefix + "_edep_points.csv")
+    if edeps is None:
+        print(f"[skip traj-colored] no edep points for {label}")
+        return
+    fig, ax = plt.subplots(figsize=(6, 3.2))
+    depth = -edeps["z_um"]
+    e = edeps["edep_kev"]
+    sc = ax.scatter(depth, edeps["x_um"], c=e, s=3, cmap="hot",
+                    vmin=0, vmax=np.percentile(e, 98), linewidths=0)
+    ax.set_xlim(0, max_depth)
+    ax.set_xlabel("Height / Depth (μm)")
+    ax.set_ylabel("X (μm)")
+    ax.set_title(f"β trajectories — {label}", fontsize=10)
+    cb = fig.colorbar(sc, ax=ax, pad=0.02)
+    cb.set_label("deposit (keV)")
+    fig.tight_layout()
+    out = os.path.join(out_dir, f"trajcolor_{label}.png")
+    fig.savefig(out, dpi=150); plt.close(fig)
+    print(f"[ok] {out}")
+
+
+def plot_heatmap_panel(prefix, label, out_dir, max_depth=10.0):
+    """论文图2风格:2D 沉积热图(背景)+ 黑线 EDD(keV左轴)+ 红线 EDR(%右轴)。"""
+    mat, meta = read_map2d(prefix)
+    data = read_edd_edr(prefix)
+    if mat is None or data is None:
+        print(f"[skip heatmap] no map2d/edd for {label}")
+        return
+    xhalf = meta.get("xHalfUm", 2.5)
+    ndepth = mat.shape[0]
+    bw = meta.get("binWidthUm", 0.05)
+    full_depth = ndepth * bw
+
+    fig, axh = plt.subplots(figsize=(6, 4.2))
+    # 热图:行=深度(转置使深度在 x 轴),列=横向 x
+    extent = [0, full_depth, -xhalf, xhalf]
+    axh.imshow(mat.T, origin="lower", aspect="auto", extent=extent,
+               cmap="jet", interpolation="bilinear")
+    axh.set_xlim(0, max_depth)
+    axh.set_yticks([])                       # 纵向为横向X(仅作背景),隐藏刻度
+    axh.set_xlabel("Height (μm)")
+
+    # 叠加曲线:用独立坐标轴(共享 x)
+    pos = axh.get_position()
+    axE = fig.add_axes([pos.x0, pos.y0, pos.width, pos.height])
+    axE.set_facecolor("none")
+    axE.set_xlim(0, max_depth)
+    d = data["depth_um"]
+    # EDD 缩放到 keV 视觉范围(归一化形状 → 任意单位,标 a.u./keV)
+    edd = data["edd_total"]
+    axE.plot(d, edd / edd.max(), color="black", lw=2)
+    axE.set_ylim(0, 1.15)
+    axE.set_ylabel("Energy deposition (a.u.)")
+    axE.patch.set_alpha(0)
+    axE.set_xticks([])
+
+    axR = axE.twinx()
+    axR.plot(d, data["edr_total"] * 100.0, color="red", lw=2)
+    axR.set_ylim(0, 100)
+    axR.set_ylabel("Deposition ratio (%)", color="red")
+    axR.tick_params(axis="y", labelcolor="red")
+
+    axh.set_title(f"2D deposition map + EDD/EDR — {label}", fontsize=10)
+    out = os.path.join(out_dir, f"heatmap_{label}.png")
+    fig.savefig(out, dpi=150); plt.close(fig)
+    print(f"[ok] {out}")
+
+
 def plot_paper_panel(prefix, label, out_dir, max_depth=10.0):
     """论文 Fig.2 风格复合面板:上=β轨迹,下=双轴(红 EDD / 蓝 EDR) vs 深度。"""
     data = read_edd_edr(prefix)
@@ -242,6 +330,8 @@ def main():
         series.append((prefix, label, data))
         plot_trajectory(prefix, label, args.out_dir, args.height_um)
         plot_paper_panel(prefix, label, args.out_dir)
+        plot_traj_colored(prefix, label, args.out_dir)
+        plot_heatmap_panel(prefix, label, args.out_dir)
 
     if not series:
         print("ERROR: no data found. Run betasim first.")

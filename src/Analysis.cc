@@ -24,6 +24,7 @@ void Analysis::Configure(const G4String& prefix, G4int nTracks, G4double maxDept
 void Analysis::Reset() {
     fEddWall.assign(fNBins, 0.0);
     fEddFill.assign(fNBins, 0.0);
+    fMap2D.assign(static_cast<size_t>(fNBins) * fNx, 0.0);
     fTotalIncidentKeV = 0.0;
     fNIncident = 0;
     fNBackscatter = 0;
@@ -44,6 +45,17 @@ void Analysis::AddEdep(G4double depthUm, G4double edepKeV, bool isFill) {
     if (b < 0) return;
     if (isFill) { fEddFill[b] += edepKeV; fHasFill = true; }
     else        { fEddWall[b] += edepKeV; }
+}
+
+void Analysis::AddEdepMap(G4double depthUm, G4double xUm, G4double edepKeV) {
+    int db = bin(depthUm);
+    if (db < 0) return;
+    // 横向 x 映射到 [0, fNx),窗口 ±fXHalfUm
+    double fx = (xUm + fXHalfUm) / (2.0 * fXHalfUm);
+    if (fx < 0.0 || fx >= 1.0) return;
+    int xb = static_cast<int>(fx * fNx);
+    if (xb < 0 || xb >= fNx) return;
+    fMap2D[static_cast<size_t>(db) * fNx + xb] += edepKeV;
 }
 
 void Analysis::AddTrackPoint(G4int eventID, G4double xUm, G4double zUm) {
@@ -92,6 +104,21 @@ void Analysis::Write() {
         f << "event_id,x_um,z_um,edep_kev\n" << std::setprecision(6);
         for (auto& p : fEdepPoints)
             f << static_cast<int>(p[0]) << ',' << p[1] << ',' << p[2] << ',' << p[3] << '\n';
+    }
+
+    // —— 2D 沉积图(论文热力图背景用)—— //
+    {
+        std::ofstream f(fPrefix + "_map2d.csv");
+        // 头:nx, xHalfUm, nDepth, binWidthUm —— 便于 plot.py 还原坐标
+        f << "# nx=" << fNx << " xHalfUm=" << fXHalfUm
+          << " nDepth=" << fNBins << " binWidthUm=" << fBinWidthUm << "\n";
+        for (int db = 0; db < fNBins; ++db) {
+            for (int xb = 0; xb < fNx; ++xb) {
+                if (xb) f << ',';
+                f << fMap2D[static_cast<size_t>(db) * fNx + xb];
+            }
+            f << '\n';
+        }
     }
 
     // —— 自检摘要 —— //
