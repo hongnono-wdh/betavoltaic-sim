@@ -54,3 +54,13 @@ python analysis/plot.py --prefixes data/我的=标签   # 自动出 heatmap_/tra
 - EDD 峰位 0.43μm vs 论文 0.9μm:与 TiO2 密度/buildup 有关,可微调材料密度核对。
 - 热图色阶/平滑度、字体字号统一到期刊要求(如 7pt、矢量 PDF 输出)。
 - 输出矢量 PDF(`fig.savefig(..., format='pdf')`)供排版。
+
+## 5. 兼顾"好看 + 准确"——双轨对比图(compare_*)
+单能(论文同款形状)与完整谱(准确数值)有取舍。解决:**一张图同时画两者**:
+- 背景热图 + EDD/EDR **实线 = 完整 β 谱(准确,标注真实 EDR 饱和值)**;
+- **虚线 = 单能 17.4 keV(论文同款次表面峰形状)**。
+命令:`python analysis/plot.py --compare TSC:data/TSC_full:data/TSC_mono ...`
+比单选一种更诚实、信息更丰富(还顺带解释了"论文为何峰在次表面")。
+
+## 6. 图内文字一律用英文(否则中文→豆腐块 □□)
+matplotlib 默认字体无 CJK 字形,中文标签会变方框;且国际期刊要求英文。所有 title/label/legend/annotation 用英文。μm/β 等符号 DejaVu Sans 可正常渲染。

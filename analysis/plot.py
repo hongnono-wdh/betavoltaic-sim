@@ -215,6 +215,55 @@ def plot_heatmap_panel(prefix, label, out_dir, max_depth=10.0):
     print(f"[ok] {out}")
 
 
+def plot_compare(label, full_prefix, mono_prefix, out_dir, max_depth=10.0):
+    """双轨对比图(兼顾好看+准确):
+       背景热图=完整谱(准确);EDD/EDR 实线=完整谱(准确数值),虚线=单能17.4(论文同款形状)。"""
+    df = read_edd_edr(full_prefix); dm = read_edd_edr(mono_prefix)
+    mat, meta = read_map2d(full_prefix)
+    if df is None or dm is None:
+        print(f"[skip compare] missing data for {label}"); return
+
+    def edd_kev_um(data):
+        d = data["depth_um"]
+        if "edd_kev_total" in data.dtype.names and len(d) > 1:
+            return d, data["edd_kev_total"] / (d[1] - d[0])
+        return d, data["edd_total"]
+
+    fig, axh = plt.subplots(figsize=(6.2, 4.4))
+    if mat is not None:
+        xhalf = meta.get("xHalfUm", 2.0); bw = meta.get("binWidthUm", 0.05)
+        nz = mat[mat > 0]; vmax = np.percentile(nz, 96) if nz.size else 1.0
+        axh.imshow(mat.T, origin="lower", aspect="auto",
+                   extent=[0, mat.shape[0]*bw, -xhalf, xhalf],
+                   cmap="jet", interpolation="bilinear", vmin=0, vmax=vmax, alpha=0.85)
+    axh.set_xlim(0, max_depth); axh.set_yticks([]); axh.set_xlabel("Height / Depth (μm)")
+
+    pos = axh.get_position()
+    axE = fig.add_axes([pos.x0, pos.y0, pos.width, pos.height]); axE.patch.set_alpha(0)
+    axE.set_xlim(0, max_depth); axE.set_xticks([])
+    df_d, df_e = edd_kev_um(df); dm_d, dm_e = edd_kev_um(dm)
+    axE.plot(df_d, df_e, color="black", lw=2.0, label="EDD: full β-spectrum (accurate)")
+    axE.plot(dm_d, dm_e, color="black", lw=1.6, ls="--", label="EDD: mono 17.4 keV (ref-style)")
+    axE.set_ylabel("Energy deposition (keV/μm)")
+    axE.set_ylim(0, max(df_e.max(), dm_e.max()) * 1.15)
+
+    axR = axE.twinx()
+    axR.plot(df["depth_um"], df["edr_total"]*100, color="red", lw=2.0, label="EDR: full")
+    axR.plot(dm["depth_um"], dm["edr_total"]*100, color="red", lw=1.6, ls="--", label="EDR: mono")
+    axR.set_ylim(0, 100); axR.set_ylabel("Deposition ratio (%)", color="red")
+    axR.tick_params(axis="y", labelcolor="red")
+
+    sat_full = df["edr_total"][-1]*100
+    axE.text(0.97, 0.06, f"accurate EDR saturation = {sat_full:.0f}%", transform=axE.transAxes,
+             ha="right", fontsize=8, bbox=dict(boxstyle="round", fc="white", ec="0.5", alpha=0.8))
+    axE.legend(loc="upper right", fontsize=7, framealpha=0.85)
+    axh.set_title(f"{label}: full spectrum (solid, accurate) vs mono 17.4 keV (dashed, ref-style)",
+                  fontsize=8.5)
+    out = os.path.join(out_dir, f"compare_{label}.png")
+    savefig_both(fig, out); plt.close(fig)
+    print(f"[ok] {out}")
+
+
 def plot_paper_panel(prefix, label, out_dir, max_depth=10.0):
     """论文 Fig.2 风格复合面板:上=β轨迹,下=双轴(红 EDD / 蓝 EDR) vs 深度。"""
     data = read_edd_edr(prefix)
@@ -339,9 +388,20 @@ def main():
     ap.add_argument("--height-um", type=float, default=12.0)
     ap.add_argument("--prefixes", nargs="*", default=None,
                     help="形如 data/TSC=TSC ；省略则用黄金测试默认三结构")
+    ap.add_argument("--compare", nargs="*", default=None,
+                    help="双轨对比图,形如 标签:完整谱前缀:单能前缀(如 TSC:data/TSC:data/TSC_mono)")
     args = ap.parse_args()
 
     os.makedirs(args.out_dir, exist_ok=True)
+
+    if args.compare:
+        for spec in args.compare:
+            parts = spec.split(":")
+            if len(parts) == 3:
+                plot_compare(parts[0], parts[1], parts[2], args.out_dir)
+            else:
+                print(f"[warn] bad --compare spec: {spec}")
+        return 0
 
     if args.prefixes:
         items = []
