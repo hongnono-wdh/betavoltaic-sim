@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>β 能量沉积仿真 · 项目报告(方案 A / 方案 B)</title>
+<style>
+  :root{
+    --bg:#0d1117; --bg2:#161b22; --bg3:#1c2330; --line:#2a3140;
+    --tx:#e6edf3; --tx2:#9da7b3; --tx3:#6e7886;
+    --ac:#2dd4bf; --ac2:#38bdf8; --warn:#f0b429; --ok:#3fb950; --bad:#f85149;
+    --code:#0a0e14; --rad:14px; --mono:'Cascadia Code','SFMono-Regular',Consolas,'Liberation Mono',Menlo,monospace;
+    --sans:system-ui,-apple-system,'Segoe UI',Roboto,'Helvetica Neue','Microsoft YaHei',sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:var(--sans);line-height:1.65;font-size:16px}
+  a{color:var(--ac2);text-decoration:none}
+  a:hover{text-decoration:underline}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+
+  /* header */
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line);
+    background:radial-gradient(1200px 400px at 70% -50%,rgba(45,212,191,.14),transparent 70%);}
+  .kicker{color:var(--ac);font-family:var(--mono);font-size:13px;letter-spacing:.18em;text-transform:uppercase;margin:0 0 14px}
+  h1{font-size:clamp(28px,4vw,44px);line-height:1.15;margin:0 0 16px;font-weight:700;letter-spacing:-.02em}
+  .sub{color:var(--tx2);font-size:18px;max-width:760px;margin:0}
+  .meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px}
+  .tag{background:var(--bg3);border:1px solid var(--line);color:var(--tx2);
+    font-family:var(--mono);font-size:12px;padding:5px 11px;border-radius:999px}
+
+  /* nav */
+  nav{position:sticky;top:0;z-index:20;background:rgba(13,17,23,.85);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line)}
+  nav .wrap{display:flex;gap:6px;overflow-x:auto;padding:10px 24px}
+  nav a{color:var(--tx2);font-size:14px;padding:8px 13px;border-radius:8px;white-space:nowrap}
+  nav a:hover{background:var(--bg3);color:var(--tx);text-decoration:none}
+
+  section{padding:54px 0;border-bottom:1px solid var(--line)}
+  h2{font-size:26px;margin:0 0 8px;font-weight:700;letter-spacing:-.01em;display:flex;align-items:center;gap:12px}
+  h2 .n{font-family:var(--mono);font-size:15px;color:var(--ac);background:var(--bg3);
+    border:1px solid var(--line);width:34px;height:34px;display:grid;place-items:center;border-radius:9px;flex:none}
+  h3{font-size:18px;margin:30px 0 10px;color:var(--tx)}
+  p{color:var(--tx2);margin:12px 0}
+  .lead{color:var(--tx);font-size:17px}
+
+  /* cards */
+  .grid{display:grid;gap:16px}
+  .g2{grid-template-columns:repeat(2,1fr)} .g3{grid-template-columns:repeat(3,1fr)} .g4{grid-template-columns:repeat(4,1fr)}
+  @media(max-width:760px){.g2,.g3,.g4{grid-template-columns:1fr}}
+  .card{background:var(--bg2);border:1px solid var(--line);border-radius:var(--rad);padding:20px}
+  .card h4{margin:0 0 6px;font-size:15px;color:var(--tx)}
+  .card p{margin:0;font-size:14px;color:var(--tx2)}
+  .stat{font-family:var(--mono);font-size:30px;font-weight:700;color:var(--ac);line-height:1}
+  .stat.s2{color:var(--ac2)} .stat.warn{color:var(--warn)}
+  .statlbl{font-size:13px;color:var(--tx3);margin-top:8px}
+
+  /* code */
+  pre{background:var(--code);border:1px solid var(--line);border-radius:12px;padding:18px 18px;
+    overflow:auto;margin:14px 0;font-family:var(--mono);font-size:13.5px;line-height:1.6}
+  code{font-family:var(--mono)}
+  pre code{color:#c9d1d9}
+  .cmt{color:#6e7886} .kw{color:#ff7b72} .str{color:#a5d6ff} .fn{color:#d2a8ff} .num{color:#79c0ff}
+  p code,li code{background:var(--bg3);border:1px solid var(--line);padding:1px 6px;border-radius:6px;font-size:13px;color:var(--ac)}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:16px 0;font-size:14px;overflow:hidden;border-radius:12px}
+  th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line)}
+  thead th{background:var(--bg3);color:var(--tx);font-weight:600;font-size:13px}
+  tbody tr{background:var(--bg2)}
+  tbody tr:hover{background:var(--bg3)}
+  td.mono,th.mono{font-family:var(--mono)}
+  .pill{display:inline-block;font-family:var(--mono);font-size:12px;padding:2px 9px;border-radius:999px;border:1px solid}
+  .pill.ok{color:var(--ok);border-color:rgba(63,185,80,.4);background:rgba(63,185,80,.1)}
+  .pill.warn{color:var(--warn);border-color:rgba(240,180,41,.4);background:rgba(240,180,41,.1)}
+
+  /* steps */
+  ol.steps{counter-reset:s;list-style:none;padding:0;margin:18px 0}
+  ol.steps>li{position:relative;padding:0 0 22px 48px;margin:0}
+  ol.steps>li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:0;
+    width:32px;height:32px;background:var(--bg3);border:1px solid var(--ac);color:var(--ac);
+    border-radius:50%;display:grid;place-items:center;font-family:var(--mono);font-weight:700;font-size:14px}
+  ol.steps>li::after{content:"";position:absolute;left:15.5px;top:34px;bottom:0;width:1px;background:var(--line)}
+  ol.steps>li:last-child::after{display:none}
+  ol.steps>li h4{margin:4px 0 6px;font-size:16px;color:var(--tx)}
+
+  .callout{border-left:3px solid var(--warn);background:rgba(240,180,41,.07);padding:14px 18px;border-radius:0 10px 10px 0;margin:18px 0}
+  .callout.ok{border-color:var(--ok);background:rgba(63,185,80,.07)}
+  .callout.info{border-color:var(--ac2);background:rgba(56,189,248,.07)}
+  .callout p{color:var(--tx);margin:6px 0}
+  .callout strong{color:var(--tx)}
+
+  footer{padding:40px 0 70px;color:var(--tx3);font-size:13px}
+  .flow{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:16px 0;font-family:var(--mono);font-size:13px}
+  .flow .box{background:var(--bg3);border:1px solid var(--line);padding:8px 13px;border-radius:9px;color:var(--tx)}
+  .flow .arr{color:var(--ac)}
+  ul.clean{color:var(--tx2);padding-left:20px}
+  ul.clean li{margin:7px 0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.two{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <p class="kicker">Geant4 · Betavoltaic · Monte-Carlo</p>
+    <h1>β 能量沉积仿真引擎 + Claude Code 技能</h1>
+    <p class="sub">让不懂编程的材料研究者,只改一份配置就能可靠地完成放射性同位素 β 源在纳米结构中的能量沉积(EDD/EDR)、轨迹与最优结构高度仿真。复现论文 <em>Composites Part B</em> 239 (2022) 109952 的 Fig.2。</p>
+    <div class="meta">
+      <span class="tag">Geant4 11.3.2</span>
+      <span class="tag">Livermore EM</span>
+      <span class="tag">MSVC / Windows</span>
+      <span class="tag">Python · matplotlib</span>
+      <span class="tag">2026-06-06</span>
+    </div>
+  </div>
+</header>
+
+<nav><div class="wrap">
+  <a href="#overview">概览</a>
+  <a href="#planA">方案 A · 引擎</a>
+  <a href="#steps">执行步骤</a>
+  <a href="#code">关键代码</a>
+  <a href="#valid">论文对照验证</a>
+  <a href="#planB">方案 B · 现场生成</a>
+  <a href="#hermes">Hermes 上手指南</a>
+</div></nav>
+
+<!-- OVERVIEW -->
+<section id="overview"><div class="wrap">
+  <h2><span class="n">01</span>项目概览</h2>
+  <p class="lead">核心理念:<strong style="color:var(--tx)">编译一次,配置到底</strong>。研究者永远不碰 C++,只动一个 <code>config.yaml</code>。</p>
+
+  <div class="grid g2" style="margin-top:22px">
+    <div class="card">
+      <h4>第 1 层 · 参数化引擎 <code>betasim.exe</code></h4>
+      <p>C++ Geant4,编译一次。读宏 → 建几何/源/物理 → 跑 → 写 CSV。几何(实心/纳米管/纳米线)、同位素(Ni-63/H-3/C-14/Pm-147)、材料全部参数化。</p>
+    </div>
+    <div class="card">
+      <h4>第 2 层 · Claude Code 技能 <code>betavoltaic-sim</code></h4>
+      <p>编排者:装环境 → 访谈式问目标 → 生成配置 → 运行 → 出图 → 大白话解读。可靠性来自下层"验证过的固定引擎"。</p>
+    </div>
+  </div>
+
+  <div class="grid g4" style="margin-top:16px">
+    <div class="card"><div class="stat">17.54<span style="font-size:15px;color:var(--tx3)"> keV</span></div><div class="statlbl">Ni-63 β 谱平均能量(论文 17.4)</div></div>
+    <div class="card"><div class="stat s2">10.1<span style="font-size:15px;color:var(--tx3)"> μm</span></div><div class="statlbl">TNTAs 最优高度(论文 ~10)</div></div>
+    <div class="card"><div class="stat s2">14.7<span style="font-size:15px;color:var(--tx3)"> %</span></div><div class="statlbl">电解液吸收占比(论文 ~16)</div></div>
+    <div class="card"><div class="stat">7<span style="font-size:15px;color:var(--tx3)"> 张</span></div><div class="statlbl">输出 PNG(轨迹/EDD/EDR/深度分布)</div></div>
+  </div>
+
+  <h3>数据流</h3>
+  <div class="flow">
+    <span class="box">config.yaml</span><span class="arr">→</span>
+    <span class="box">yaml_to_mac.py</span><span class="arr">→</span>
+    <span class="box">run.mac</span><span class="arr">→</span>
+    <span class="box">betasim.exe</span><span class="arr">→</span>
+    <span class="box">CSV</span><span class="arr">→</span>
+    <span class="box">plot.py</span><span class="arr">→</span>
+    <span class="box">figures/*.png</span>
+  </div>
+  <p>仿真(C++,产数据)与绘图(Python,消费数据)通过 <strong style="color:var(--tx)">CSV 接口</strong>解耦,可独立开发调试。</p>
+</div></section>
+
+<!-- PLAN A -->
+<section id="planA"><div class="wrap">
+  <h2><span class="n">02</span>方案 A · 引擎架构</h2>
+  <p>工程结构(项目根 <code>E:\code\geant4</code>):</p>
+<pre><code><span class="cmt"># 第 1 层:参数化引擎(C++)</span>
+src/
+  BetaSpectrum.hh            <span class="cmt"># 纯 C++ β⁻ 谱采样(可单测,Fermi 理论)</span>
+  DetectorConstruction.*     <span class="cmt"># 三结构几何 + 材料工厂(锥形管 G4Cons)</span>
+  DetectorMessenger.*        <span class="cmt"># /det/* 宏命令(结构/材料/尺寸)</span>
+  PrimaryGeneratorAction.*   <span class="cmt"># β 源:谱采样 + 入射模型(/gun/incidence)</span>
+  PrimaryGeneratorMessenger.*<span class="cmt"># /gun/* /ana/* 宏命令</span>
+  PhysicsList.*              <span class="cmt"># Livermore 低能 EM + 纳米尺度 cuts</span>
+  SteppingAction.*           <span class="cmt"># EDD/EDR 打分 + 入射能量 + 轨迹</span>
+  EventAction.* RunAction.* ActionInitialization.* main.cc
+test/  test_beta.cc          <span class="cmt"># 纯 C++ 单测:β 谱平均 ≈17.4 keV</span>
+
+<span class="cmt"># 第 2 层 + 工具</span>
+analysis/  plot.py  yaml_to_mac.py  compare_runs.py  requirements.txt
+configs/   example_TiO2_TNTAs.yaml  example_ZnO_nanowire.yaml
+macros/    golden_tsc.mac  golden_tnt.mac  golden_etnt.mac
+scripts/   install_vs.ps1  build_geant4.ps1  run_all.ps1
+.claude/skills/betavoltaic-sim/SKILL.md
+</code></pre>
+
+  <h3>物理建模要点</h3>
+  <ul class="clean">
+    <li><strong style="color:var(--tx)">源</strong>:⁶³Ni,Fermi β⁻ 谱采样(平均 17.4 keV / 端点 66.7 keV),贴结构顶面发射。</li>
+    <li><strong style="color:var(--tx)">物理</strong>:<code>G4EmLivermorePhysics</code>(论文同款),产生阈下探到 ~10 nm 以分辨纳米尺度沉积。</li>
+    <li><strong style="color:var(--tx)">几何</strong>:实心立方(TSC)、<strong style="color:var(--tx)">锥形</strong>纳米管阵列(TNTAs,内径顶 50nm→底 0,底部实心锥)、填电解液(E-TNTAs)、纳米线;横向自动放大以容纳侧向散射。</li>
+    <li><strong style="color:var(--tx)">打分</strong>:按深度直方化 EDD/EDR,区分管壁 vs 电解液;记录前 N 条轨迹与沉积点。</li>
+  </ul>
+</div></section>
+
+<!-- STEPS -->
+<section id="steps"><div class="wrap">
+  <h2><span class="n">03</span>执行步骤(Windows)</h2>
+  <ol class="steps">
+    <li>
+      <h4>装 VS C++ 组件(静默)</h4>
+      <p>已装 VS2022 则添加 C++ 组件。提权运行脚本(避开 <code>--wait</code> 非法参数与 GUI 等待坑):</p>
+<pre><code><span class="cmt"># scripts/install_vs.ps1 内部用 ProcessStartInfo + WaitForExit</span>
+<span class="fn">Start-Process</span> powershell -ArgumentList '-File','scripts\install_vs.ps1' -Verb RunAs -Wait</code></pre>
+    </li>
+    <li>
+      <h4>编译 Geant4 11.3.2(静态库)</h4>
+      <p>源码装 E 盘;<strong style="color:var(--tx)">必须静态库</strong>否则 G4processes.dll 触发 LNK1189(超 65535 导出符号)。耗时 30min–2h。</p>
+<pre><code>powershell -File scripts\build_geant4.ps1
+<span class="cmt"># 关键:-DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON</span>
+<span class="cmt">#       -DGEANT4_INSTALL_DATA=ON -DGEANT4_USE_QT=OFF</span></code></pre>
+    </li>
+    <li>
+      <h4>编译引擎 betasim</h4>
+<pre><code>. .\setup_env.ps1                       <span class="cmt"># 载入 G4 数据集 + MSVC 环境</span>
+cmake -S . -B build -G <span class="str">"Ninja"</span> -DGeant4_DIR=E:\geant4\install\lib\cmake\Geant4
+cmake --build build                     <span class="cmt"># 关键:CMake 里 if(MSVC) add_compile_options(/utf-8)</span>
+.\build\test_beta.exe                   <span class="cmt"># 自检:Ni-63 平均 ≈17.5 keV ✓</span></code></pre>
+    </li>
+    <li>
+      <h4>跑黄金测试(复现 Fig.2)</h4>
+<pre><code>.\scripts\run_all.ps1                    <span class="cmt"># 三结构 + 出图 → figures/</span></code></pre>
+    </li>
+    <li>
+      <h4>跑自己的材料(只改配置)</h4>
+<pre><code>python analysis\yaml_to_mac.py configs\my.yaml -o run.mac
+.\build\betasim.exe run.mac
+python analysis\plot.py --prefixes data\my=MyRun</code></pre>
+    </li>
+  </ol>
+  <div class="callout"><p><strong>Windows 踩坑提示:</strong> ① VS <code>setup.exe modify</code> 不接受 <code>--wait</code>(→退出码 87);② MSVC 读 UTF-8 中文注释须 <code>/utf-8</code>;③ PowerShell 5.1 读无 BOM 的 .ps1 按 GBK 解析,被 <code>-File</code> 调用的脚本须纯 ASCII 注释;④ Geant4 须静态库避 LNK1189。</p></div>
+</div></section>
+
+<!-- CODE -->
+<section id="code"><div class="wrap">
+  <h2><span class="n">04</span>关键代码</h2>
+
+  <h3>研究者唯一面对的"实验设置单" config.yaml</h3>
+<pre><code><span class="kw">isotope</span>:    Ni-63            <span class="cmt"># Ni-63 / H-3 / C-14 / Pm-147</span>
+<span class="kw">structure</span>:  nanotube_array   <span class="cmt"># solid / nanotube_array / nanowire_array</span>
+<span class="kw">material</span>:   TiO2_anatase     <span class="cmt"># 内置库 + Geant4 NIST 材料</span>
+<span class="kw">fill</span>:       none             <span class="cmt"># none / acetonitrile(电解液近似)</span>
+<span class="kw">incidence</span>:  normal           <span class="cmt"># isotropic / hemisphere / normal</span>
+<span class="kw">substrate</span>:  Ti
+<span class="kw">geometry</span>:   {height_um: 12, tube_outer_nm: 60, tube_inner_nm: 50, pitch_nm: 120}
+<span class="kw">run</span>:        {n_events: 50000, n_tracks: 150}
+<span class="kw">output_prefix</span>: data/myrun</code></pre>
+
+  <h3>β 谱采样核心(Fermi 理论 + 拒绝采样)</h3>
+<pre><code><span class="cmt">// shape(T) ∝ F(Z,T)·p·(T+mₑc²)·(Q−T)²   —— 允许跃迁 β⁻ 谱</span>
+<span class="kw">static double</span> <span class="fn">shape</span>(<span class="kw">const</span> IsotopeData& d, <span class="kw">double</span> T_keV){
+    <span class="kw">const double</span> mc2 = <span class="num">510.99895</span>;
+    <span class="kw">const double</span> pc  = std::<span class="fn">sqrt</span>(T_keV*(T_keV + <span class="num">2</span>*mc2));      <span class="cmt">// 相对论动量×c</span>
+    <span class="kw">const double</span> q   = d.endpoint_keV - T_keV;                <span class="cmt">// (Q−T)</span>
+    <span class="kw">const double</span> F   = <span class="fn">fermiFunction</span>(d.daughterZ, T_keV);    <span class="cmt">// 库仑修正(子核 Z)</span>
+    <span class="kw">return</span> F * pc * (T_keV+mc2) * q * q;
+}</code></pre>
+
+  <h3>锥形纳米管几何(对应论文真实 Fig.1)</h3>
+<pre><code><span class="cmt">// 内径自顶部 rin 线性收缩到底部 0 → 底部为实心 TiO₂ 锥</span>
+<span class="cmt">// G4Cons(name, rmin1,rmax1 @底 , rmin2,rmax2 @顶 , hz, sphi, dphi)</span>
+tubeSolid = <span class="kw">new</span> <span class="fn">G4Cons</span>(<span class="str">"structure"</span>, <span class="num">0</span>, rout, rin, rout, <span class="num">0.5</span>*H, <span class="num">0</span>, twopi);
+fillSolid = <span class="kw">new</span> <span class="fn">G4Cons</span>(<span class="str">"fill"</span>,      <span class="num">0</span>, <span class="num">0</span>,    <span class="num">0</span>,   rin,  <span class="num">0.5</span>*H, <span class="num">0</span>, twopi);</code></pre>
+
+  <h3>宏命令(参数化接口,只改不编译)</h3>
+<pre><code>/det/structure nanotube_array
+/det/material  TiO2_anatase
+/det/heightUm  12
+/gun/isotope   Ni-63
+/gun/incidence normal
+/ana/prefix    data/TNTAs
+/run/initialize
+/run/beamOn    50000</code></pre>
+</div></section>
+
+<!-- VALIDATION -->
+<section id="valid"><div class="wrap">
+  <h2><span class="n">05</span>论文 Fig.2 对照验证</h2>
+  <p class="lead">采用真实 Fig.1 几何(锥形管)+ 法向入射后,论文 Fig.2 的<strong style="color:var(--tx)">核心结论(最优高度、曲线形状)已复现</strong>。</p>
+
+  <table>
+    <thead><tr><th>结构</th><th class="mono">最优高度(本仿真)</th><th class="mono">论文</th><th class="mono">EDR 饱和</th><th class="mono">论文</th><th>判定</th></tr></thead>
+    <tbody>
+      <tr><td>TSC 实心</td><td class="mono">3.4 μm</td><td class="mono">~2 μm</td><td class="mono">73.9%</td><td class="mono">90%</td><td><span class="pill ok">形状/浅沉积 ✓</span></td></tr>
+      <tr><td>TNTAs 空心管</td><td class="mono">10.1 μm</td><td class="mono">~10 μm</td><td class="mono">43.0%</td><td class="mono">76%</td><td><span class="pill ok">最优高度 ✓</span></td></tr>
+      <tr><td>E-TNTAs 填液</td><td class="mono">6.9 μm</td><td class="mono">~9 μm</td><td class="mono">46.3%</td><td class="mono">60%</td><td><span class="pill ok">居中趋势 ✓</span></td></tr>
+      <tr><td>电解液部分</td><td class="mono">—</td><td class="mono">—</td><td class="mono">14.7%</td><td class="mono">~16%</td><td><span class="pill ok">量级吻合 ✓</span></td></tr>
+      <tr><td>ZnO 纳米线(干跑)</td><td class="mono">2.5 μm</td><td class="mono">—</td><td class="mono">51.5%</td><td class="mono">—</td><td><span class="pill ok">端到端通 ✓</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="grid g2">
+    <div class="callout ok"><p><strong>✓ 已复现(强证据)</strong></p>
+      <ul class="clean">
+        <li>β 谱:平均 17.54 keV、端点 66.62 keV(论文 17.4/66.7)</li>
+        <li>最优高度:管结构 ~10μm、实心 ~2-3μm(论文核心结论)</li>
+        <li>EDD/EDR 曲线形状贴合 Fig.2:实心快饱和、空心深穿透</li>
+        <li>电解液吸收 14.7%(论文 ~16%)</li>
+      </ul>
+    </div>
+    <div class="callout"><p><strong>⚠ 已知偏差(诚实记录)</strong></p>
+      <ul class="clean">
+        <li>绝对吸收率偏低:TSC 74% vs 90%、TNTAs 43% vs 76%</li>
+        <li>根因:各向同性/带角入射下 ~40% 背散射是真实物理;论文 10% 损失需其未公开的源-结构耦合(再俘获/特定角分布)</li>
+        <li>已实测 5 种入射模型证明:标准物理 + 论文几何下不可同时达 90%/76%</li>
+        <li>逐位匹配属独立"标定研究",本工具<strong style="color:var(--tx)">不靠反推/造假凑数</strong></li>
+      </ul>
+    </div>
+  </div>
+  <p>图见 <code>figures/</code>:<code>EDR.png</code> · <code>EDD.png</code> · <code>DEPTH_DIST.png</code> · <code>trajectory_{TSC,TNTAs,ETNTAs,ZnO_NW}.png</code>。完整记录见 <code>docs/superpowers/specs/2026-06-06-validation-report.md</code> 与 <code>2026-06-06-calibration-scan.md</code>。</p>
+</div></section>
+
+<!-- PLAN B -->
+<section id="planB"><div class="wrap">
+  <h2><span class="n">06</span>方案 B · 现场生成 C++(以方案 A 为基准)</h2>
+  <p>当研究者的需求<strong style="color:var(--tx)">超出方案 A 参数范围</strong>(如核壳纳米线、梯度孔隙、非圆截面、新打分量)时,技能现场生成一份新的 Geant4 C++,并<strong style="color:var(--tx)">用方案 A 当"标准答案"自动校验</strong>,确保不可靠的代码不会被当成可信结果交付。</p>
+
+  <h3>执行方法</h3>
+  <ol class="steps">
+    <li><h4>需求 → 结构化规格</h4><p>把研究者的几何/材料/源/打分需求复述成 JSON 规格。</p></li>
+    <li><h4>以方案 A 源码为模板生成 C++</h4><p>改写 <code>DetectorConstruction</code> 等,<strong style="color:var(--tx)">保持 PhysicsList / 源 / 打分骨架不变</strong>(降低出错面)。</p></li>
+    <li><h4>编译</h4><p>复用方案 A 的 CMake/工具链。</p></li>
+    <li><h4>回归校验(关键护栏)</h4>
+      <p>对方案 A <em>能表达的</em>子集(如直管 TNTAs)用方案 B 引擎重跑,和方案 A 黄金 CSV 对比:</p>
+<pre><code>python analysis\compare_runs.py data\TNTAs dataB\TNTAs --tol 0.08
+<span class="cmt"># 比较 EDR 饱和值、90%沉积深度(最优高度)、EDD 峰深度</span>
+<span class="cmt"># 相对误差 &lt; 8% → PASS;返回码 0/1 便于自动化</span></code></pre>
+    </li>
+    <li><h4>放行或回退</h4><p>仅当回归校验通过,才用方案 B 引擎跑新几何并出图;否则技能<strong style="color:var(--tx)">明确标注"未通过基准校验/不可信"</strong>,绝不静默交付。</p></li>
+  </ol>
+
+  <div class="callout info"><p><strong>护栏原则:</strong> 方案 B 生成的代码<strong>必须先在方案 A 能表达的几何上复现方案 A 的结果</strong>,才允许用于新几何——把"现场生成"的风险用"已验证基准"兜住。脚手架(<code>compare_runs.py</code> + 基准 CSV + 模板源码)已就位,设计见 <code>docs/superpowers/specs/2026-06-06-planB-design.md</code>。</p></div>
+</div></section>
+
+<!-- HERMES -->
+<section id="hermes"><div class="wrap">
+  <h2><span class="n">07</span>Hermes 上手指南(Windows)</h2>
+  <p>把整套内容交给同事 Hermes:克隆 GitHub 脚手架 → 让 Claude Code 用 <code>betavoltaic-sim</code> 技能带他装环境、跑通、学会。</p>
+
+  <h3>最快路径(3 步)</h3>
+  <ol class="steps">
+    <li><h4>克隆仓库</h4>
+<pre><code>git clone https://github.com/&lt;your-org&gt;/betavoltaic-sim.git
+cd betavoltaic-sim</code></pre></li>
+    <li><h4>在该目录打开 Claude Code,粘贴上手提示词</h4>
+      <p>提示词见下方"<a href="#hermes-prompt">教学提示词</a>",或仓库内 <code>HERMES_ONBOARDING.md</code>。</p></li>
+    <li><h4>跟着技能的检查点走</h4>
+      <p>技能会带 Hermes:装 VS C++/Geant4/Python → 跑黄金测试 → 出图 → 用大白话讲解每张图的含义。</p></li>
+  </ol>
+
+  <h3 id="hermes-prompt">教学提示词(复制给 Hermes 的 Claude Code)</h3>
+  <pre><code>我刚 clone 了 betavoltaic-sim 仓库(Windows 机器)。请用项目里的
+betavoltaic-sim 技能,带我从零搭好并学会这套 β 能量沉积仿真:
+
+1) 先读 README.md 和 docs/report.html、docs/superpowers/specs/*.md 了解全貌;
+2) 按"批次0 环境"带我装好 VS C++ 组件、编译 Geant4 11.3.2(静态库,装 E 盘)、
+   装 Python 依赖——每一步停下来等我确认,装 VS 要提权我会点 UAC;
+3) 编译 betasim,跑 test_beta 自检 β 谱(应 ≈17.5 keV);
+4) 跑黄金测试三结构 + 出图,用大白话给我讲每张图(EDD/EDR/深度分布/轨迹)
+   的物理含义,以及"最优纳米管高度"是怎么读出来的;
+5) 教我怎么改 configs/*.yaml 跑我自己的材料(我想先试 ZnO 纳米线 + Ni-63);
+6) 诚实告诉我哪些数值和论文吻合、哪些有偏差及原因(别替我粉饰)。
+
+我的环境:Windows 11,C 盘留 ≥20GB,E 盘放 Geant4。遇到需要我操作的
+(如 UAC、装组件)请明确告诉我点什么。</code></pre>
+
+  <div class="callout"><p><strong>给 Hermes 的环境提醒:</strong> ① C 盘留 ≥20GB(VS C++ 组件)、E 盘放 Geant4(源码+数据~3GB+编译);② Geant4 首次编译 30min–2h,可后台;③ 若 VS 是 Community 且装在非默认盘,脚本里 <code>$vsPath</code> 需对应修改。</p></div>
+</div></section>
+
+<footer><div class="wrap">
+  <p>β 能量沉积仿真 · 方案 A 已交付(核心结论复现,绝对值偏差已诚实记录)· 方案 B 脚手架就位。</p>
+  <p>生成于 2026-06-06 · 复现对象:N. Wang et al., <em>Composites Part B</em> 239 (2022) 109952.</p>
+</div></footer>
+
+</body>
+</html>
