@@ -68,7 +68,17 @@ python analysis\yaml_to_mac.py configs\<名字>.yaml -o run.mac
 ```powershell
 python analysis\plot.py --prefixes data\<前缀>=<标签> [...]
 ```
-生成 `figures\` 下轨迹图 + EDD + EDR。**⏸ 检查点**:把图给用户。
+生成 `figures\` 下:
+- `paper_panel_<标签>.png` —— **论文 Fig.2 风格复合面板**(上=β轨迹,下=双轴 红EDD/蓝EDR vs 深度)。要"和论文一样的图"就用这个。
+- `trajectory_*.png`(轨迹)、`EDD.png`、`EDR.png`(多结构叠加)、`DEPTH_DIST.png`(归一化深度分布→最优高度)。
+
+**⏸ 检查点**:把图给用户。
+
+> 提示:论文 TSC 的 EDD 红线峰在次表面(~0.65μm);本仿真用完整 β 谱时红线在表面最高(软 β 尾所致),EDR 蓝线一致。要红线峰也对齐,可用 `/gun/monoKeV 17`(单能)或源硬化。
+
+### 关键校准纪律(务必先做)
+用本工具预测**新材料**前,先跑一次"尺子自校准"确认物理无误:单能电子打厚+宽 slab 测背散射 η,对照文献(Al~0.16/Cu~0.30/Au~0.50)。详见 `docs/superpowers/specs/2026-06-07-tool-validation-benchmarks.md`。
+**横向容纳必须收敛**:`/det/lateralHalfUm` 要 ≥ 同位素端点能量电子射程(Ni-63 用 ≥15–20μm),否则高能 β 横向逃逸会人为压低 EDR。
 
 ## 阶段 5 · 解读(用大白话)
 读 `plot.py` 打印的 EDR 百分比,向研究者解释:

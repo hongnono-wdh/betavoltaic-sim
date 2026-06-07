@@ -95,6 +95,49 @@ def plot_trajectory(prefix, label, out_dir, height_um=12.0):
     print(f"[ok] {out}")
 
 
+def plot_paper_panel(prefix, label, out_dir, max_depth=10.0):
+    """论文 Fig.2 风格复合面板:上=β轨迹,下=双轴(红 EDD / 蓝 EDR) vs 深度。"""
+    data = read_edd_edr(prefix)
+    if data is None:
+        print(f"[skip paper-panel] no data for {label}")
+        return
+    edeps = read_points(prefix + "_edep_points.csv")
+
+    fig = plt.figure(figsize=(5.2, 6.2))
+    gs = fig.add_gridspec(2, 1, height_ratios=[1.0, 1.25], hspace=0.08)
+
+    # —— 上:轨迹/沉积点(深度横轴,横向纵轴),与下图共享深度轴 —— #
+    ax0 = fig.add_subplot(gs[0])
+    if edeps is not None:
+        depth_pts = -edeps["z_um"]
+        ax0.scatter(depth_pts, edeps["x_um"], s=2, c="orangered", alpha=0.5, linewidths=0)
+    ax0.set_xlim(0, max_depth)
+    ax0.set_ylabel("x (μm)")
+    ax0.set_title(f"β trajectories & energy deposition — {label}", fontsize=10)
+    ax0.tick_params(labelbottom=False)
+
+    # —— 下:双轴 EDD(红,左)/ EDR(蓝,右)—— #
+    ax1 = fig.add_subplot(gs[1], sharex=ax0)
+    d = data["depth_um"]
+    ax1.plot(d, data["edd_total"], color="red", lw=2, label="EDD")
+    ax1.set_xlabel("Depth (μm)")
+    ax1.set_ylabel("Deposition energy (a.u.)", color="red")
+    ax1.tick_params(axis="y", labelcolor="red")
+    ax1.set_xlim(0, max_depth)
+
+    ax2 = ax1.twinx()
+    ax2.plot(d, data["edr_total"] * 100.0, color="blue", lw=2, label="EDR")
+    ax2.set_ylabel("Deposition ratio (%)", color="blue")
+    ax2.tick_params(axis="y", labelcolor="blue")
+    ax2.set_ylim(0, 100)
+
+    fig.tight_layout()
+    out = os.path.join(out_dir, f"paper_panel_{label}.png")
+    fig.savefig(out, dpi=150)
+    plt.close(fig)
+    print(f"[ok] {out}")
+
+
 def plot_edd(series, out_dir):
     fig, ax = plt.subplots(figsize=(6, 4.5))
     for prefix, label, data in series:
@@ -198,6 +241,7 @@ def main():
             continue
         series.append((prefix, label, data))
         plot_trajectory(prefix, label, args.out_dir, args.height_um)
+        plot_paper_panel(prefix, label, args.out_dir)
 
     if not series:
         print("ERROR: no data found. Run betasim first.")
