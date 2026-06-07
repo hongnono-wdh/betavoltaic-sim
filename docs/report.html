@@ -122,7 +122,8 @@
   <a href="#planA">方案 A · 引擎</a>
   <a href="#steps">执行步骤</a>
   <a href="#code">关键代码</a>
-  <a href="#valid">论文对照验证</a>
+  <a href="#valid">尺子校准+复现</a>
+  <a href="#gallery">论文级图库</a>
   <a href="#planB">方案 B · 现场生成</a>
   <a href="#hermes">Hermes 上手指南</a>
 </div></nav>
@@ -324,6 +325,21 @@ fillSolid = <span class="kw">new</span> <span class="fn">G4Cons</span>(<span cla
   <div class="callout info"><p><strong>方法论教训(尺子的故事):</strong> 起初把偏低结果归因于"背散射天花板/论文未公开再俘获"——这是 <strong>LLM 用自洽故事为错误开脱</strong>的危险失败模式。真正问题是自己几何的边界 artifact。<strong style="color:var(--tx)">先用外部基准(η)校准"尺子" + 对所有边界做收敛测试</strong>,才暴露并解决了它。容纳尺寸要按分布的<strong style="color:var(--tx)">极值(端点能量射程)</strong>而非均值来定。</p></div>
 
   <p>图见 <code>figures/</code>:轨迹×4 + EDD + EDR + 深度分布。完整记录:<code>docs/superpowers/specs/2026-06-07-tool-validation-benchmarks.md</code>、<code>2026-06-06-validation-report.md</code>、<code>2026-06-06-calibration-scan.md</code>。</p>
+</div></section>
+
+<!-- GALLERY -->
+<section id="gallery"><div class="wrap">
+  <h2><span class="n">05b</span>论文级图库(仿真实出)</h2>
+  <p class="lead">单能 17.4 keV + 六方密堆 + 收敛容纳;每图同时导出 <strong style="color:var(--tx)">矢量 PDF</strong>(投稿用)、期刊字号。</p>
+  <div class="grid g2" style="margin-top:18px">
+    <div class="card"><img src="gallery/heatmap_TSC.png" alt="TSC 2D 沉积热图 + EDD/EDR" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">TSC:2D 热图 + 黑线 EDD(次表面峰)+ 红线 EDR(90% 平台)— 对应论文 Fig.2(a)</p></div>
+    <div class="card"><img src="gallery/heatmap_TNTAs.png" alt="TNTAs 2D 沉积热图 + EDD/EDR" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">TNTAs:EDD 宽峰 ~2.4μm、深散布 — 对应论文 Fig.2(b)</p></div>
+    <div class="card"><img src="gallery/heatmap_ETNTAs.png" alt="E-TNTAs 2D 沉积热图" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">E-TNTAs:管壁 + 电解液沉积 — 对应论文 Fig.2(c)(d)</p></div>
+    <div class="card"><img src="gallery/trajcolor_TNTAs.png" alt="β 轨迹按能量着色" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">β 轨迹按电子动能着色(高=红→低=黄)— 对应论文 Fig.1 轨迹</p></div>
+    <div class="card"><img src="gallery/EDR.png" alt="三结构 EDR vs 深度" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">三结构 EDR(吸收比)vs 深度叠加对比</p></div>
+    <div class="card"><img src="gallery/DEPTH_DIST.png" alt="归一化深度分布 → 最优高度" style="width:100%;border-radius:8px;border:1px solid var(--line)"><p style="margin-top:8px">归一化深度分布 → 推出最优结构高度</p></div>
+  </div>
+  <p style="margin-top:14px">出图方法/经验沉淀见 <code>docs/superpowers/specs/2026-06-07-plotting-guide.md</code>;矢量 PDF 在仿真机的 <code>figures/*.pdf</code>。</p>
 </div></section>
 
 <!-- PLAN B -->

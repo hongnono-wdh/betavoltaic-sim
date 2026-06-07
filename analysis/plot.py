@@ -21,6 +21,29 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+# —— 期刊级样式(投稿可用):无衬线、8–9pt、矢量 PDF 字体可编辑(fonttype 42) —— #
+matplotlib.rcParams.update({
+    "font.family": "sans-serif",
+    "font.size": 9,
+    "axes.titlesize": 10,
+    "axes.labelsize": 9,
+    "xtick.labelsize": 8,
+    "ytick.labelsize": 8,
+    "axes.linewidth": 0.8,
+    "lines.linewidth": 1.8,
+    "savefig.dpi": 300,
+    "savefig.bbox": "tight",
+    "figure.dpi": 150,
+    "pdf.fonttype": 42,   # TrueType,期刊要求文字可编辑/可搜索
+    "ps.fonttype": 42,
+})
+
+
+def savefig_both(fig, out_png):
+    """同时存 PNG(预览)与 PDF(矢量,投稿用)。"""
+    fig.savefig(out_png)
+    fig.savefig(out_png[:-4] + ".pdf")
+
 
 def read_edd_edr(prefix):
     path = prefix + "_edd_edr.csv"
@@ -90,7 +113,7 @@ def plot_trajectory(prefix, label, out_dir, height_um=12.0):
     ax.legend(loc="lower right", fontsize=7)
     fig.tight_layout()
     out = os.path.join(out_dir, f"trajectory_{label}.png")
-    fig.savefig(out, dpi=150)
+    savefig_both(fig, out)
     plt.close(fig)
     print(f"[ok] {out}")
 
@@ -134,7 +157,7 @@ def plot_traj_colored(prefix, label, out_dir, max_depth=10.0, x_half=3.0):
     cb = fig.colorbar(sc, ax=ax, pad=0.02); cb.set_label("electron energy (keV)")
     fig.tight_layout()
     out = os.path.join(out_dir, f"trajcolor_{label}.png")
-    fig.savefig(out, dpi=150); plt.close(fig)
+    savefig_both(fig, out); plt.close(fig)
     print(f"[ok] {out}")
 
 
@@ -188,7 +211,7 @@ def plot_heatmap_panel(prefix, label, out_dir, max_depth=10.0):
 
     axh.set_title(f"2D deposition map + EDD/EDR — {label}", fontsize=10)
     out = os.path.join(out_dir, f"heatmap_{label}.png")
-    fig.savefig(out, dpi=150); plt.close(fig)
+    savefig_both(fig, out); plt.close(fig)
     print(f"[ok] {out}")
 
 
@@ -235,7 +258,7 @@ def plot_paper_panel(prefix, label, out_dir, max_depth=10.0):
 
     fig.tight_layout()
     out = os.path.join(out_dir, f"paper_panel_{label}.png")
-    fig.savefig(out, dpi=150)
+    savefig_both(fig, out)
     plt.close(fig)
     print(f"[ok] {out}")
 
@@ -251,7 +274,7 @@ def plot_edd(series, out_dir):
     ax.grid(alpha=0.3)
     fig.tight_layout()
     out = os.path.join(out_dir, "EDD.png")
-    fig.savefig(out, dpi=150)
+    savefig_both(fig, out)
     plt.close(fig)
     print(f"[ok] {out}")
 
@@ -286,7 +309,7 @@ def plot_depth_distribution(series, out_dir):
     ax.grid(alpha=0.3)
     fig.tight_layout()
     out = os.path.join(out_dir, "DEPTH_DIST.png")
-    fig.savefig(out, dpi=150)
+    savefig_both(fig, out)
     plt.close(fig)
     print(f"[ok] {out}")
 
@@ -304,7 +327,7 @@ def plot_edr(series, out_dir):
     ax.grid(alpha=0.3)
     fig.tight_layout()
     out = os.path.join(out_dir, "EDR.png")
-    fig.savefig(out, dpi=150)
+    savefig_both(fig, out)
     plt.close(fig)
     print(f"[ok] {out}")
 
